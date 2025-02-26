@@ -157,7 +157,7 @@ export default function DashboardPage() {
       {/* Content Generator */}
       <div className="bg-black/40 rounded-xl border border-white/5 p-6">
         <h2 className="text-xl font-bold mb-4">Generate New Content</h2>
-        <ContentForm />
+      <ContentForm />
       </div>
 
       {/* Content Management */}

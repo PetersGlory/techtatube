@@ -1,22 +1,23 @@
-import { auth } from "@clerk/nextjs"
-import { redirect } from "next/navigation"
-import { prisma } from "@/lib/prisma"
-import { subscriptionPlans } from "@/config/subscriptions"
-import { SubscriptionForm } from "@/components/subscription-form"
+"use client";
 
-export default async function SubscriptionPage() {
-  const { userId } = auth()
+import { useAuth } from "@clerk/nextjs";
+import { redirect } from "next/navigation";
+import { subscriptionPlans } from "@/config/subscriptions";
+import { SubscriptionForm } from "@/components/subscription-form";
+import { useQuery } from "convex/react";
+import { api } from "@/convex/_generated/api";
+
+export default function SubscriptionPage() {
+  const { userId } = useAuth();
   if (!userId) {
-    redirect("/sign-in")
+    redirect("/sign-in");
   }
 
-  const user = await prisma.user.findUnique({
-    where: { clerkId: userId },
-    include: { subscription: true },
-  })
+  const user = useQuery(api.users.getUser, { userId });
+  const subscription = useQuery(api.subscriptions.getSubscription, { userId });
 
   if (!user) {
-    return <div>User not found</div>
+    return <div>User not found</div>;
   }
 
   return (
@@ -35,13 +36,13 @@ export default async function SubscriptionPage() {
               ))}
             </ul>
             <SubscriptionForm
-              planId={plan.stripePriceId}
-              isCurrentPlan={user.subscription?.plan === plan.name.toLowerCase()}
+              planId={plan.stripePriceId ?? ""}
+              isCurrentPlan={subscription?.stripePriceId === plan.stripePriceId}
             />
           </div>
         ))}
       </div>
     </div>
-  )
+  );
 }
 

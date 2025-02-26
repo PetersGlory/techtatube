@@ -19,11 +19,12 @@ interface User {
 
 export const getUser = query({
   args: { userId: v.string() },
-  handler: async (ctx: QueryCtx, args: { userId: string }) => {
-    return await ctx.db
+  handler: async (ctx, args) => {
+    const user = await ctx.db
       .query("users")
-      .filter((q: any) => q.eq(q.field("_id"), args.userId))
+      .filter((q) => q.eq(q.field("_id"), args.userId))
       .first();
+    return user;
   },
 });
 

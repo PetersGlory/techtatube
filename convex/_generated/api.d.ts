@@ -16,6 +16,7 @@ import type {
 import type * as config from "../config.js";
 import type * as content from "../content.js";
 import type * as init from "../init.js";
+import type * as subscriptions from "../subscriptions.js";
 import type * as types from "../types.js";
 import type * as users from "../users.js";
 
@@ -31,6 +32,7 @@ declare const fullApi: ApiFromModules<{
   config: typeof config;
   content: typeof content;
   init: typeof init;
+  subscriptions: typeof subscriptions;
   types: typeof types;
   users: typeof users;
 }>;

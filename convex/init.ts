@@ -1,5 +1,4 @@
 import { DatabaseReader, DatabaseWriter } from "./_generated/server";
-import { v } from "convex/values";
 
 // Initialize your database with any required data
 export async function initializeDatabase(db: DatabaseWriter) {

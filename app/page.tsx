@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { SignIn, SignInButton, SignUpButton } from "@clerk/nextjs";
-import { ArrowRight, ChevronRight, Command, BarChart2, FileText, PieChart, CheckCircle } from "lucide-react";
+import { ChevronRight, Command, BarChart2, FileText, PieChart, CheckCircle } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import { clerkTheme } from "@/lib/clerk-theme";
 
@@ -221,8 +221,16 @@ export default function Home() {
                   <SignIn 
                     appearance={{
                       elements: {
-                        card: "bg-black/40 border border-white/5",
-                        formButtonPrimary: "bg-yellow-400 hover:bg-yellow-500 text-black",
+                        ...clerkTheme.elements,
+                        card: "w-full bg-black/40 border text-gray-200 border-white/5 backdrop-blur-sm shadow-xl",
+                        headerTitle: "text-2xl font-bold text-white",
+                        headerSubtitle: "text-gray-400 text-sm",
+                        formButtonPrimary: "w-full bg-yellow-400 hover:bg-yellow-500 text-black font-medium shadow-lg",
+                        formFieldInput: "bg-black/40 border-gray-800 text-white focus:border-yellow-400/50 rounded-lg",
+                        socialButtonsBlockButton: "w-full bg-black/40 border border-white/5 hover:bg-white/5 text-white rounded-lg",
+                        footerActionLink: "text-yellow-400 hover:text-yellow-500 font-medium",
+                        dividerLine: "bg-gray-800",
+                        dividerText: "text-gray-400 text-sm",
                       }
                     }}
                   />

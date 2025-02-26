@@ -1,7 +1,10 @@
 import { NextResponse } from "next/server"
 import { auth } from "@clerk/nextjs"
+import { ConvexHttpClient } from "convex/browser"
+import { api } from "@/convex/_generated/api"
 import { stripe } from "@/lib/stripe"
-import { prisma } from "@/lib/prisma"
+
+const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!)
 
 export async function POST(req: Request) {
   try {
@@ -10,10 +13,7 @@ export async function POST(req: Request) {
       return new NextResponse("Unauthorized", { status: 401 })
     }
 
-    const user = await prisma.user.findUnique({
-      where: { clerkId: userId },
-    })
-
+    const user = await convex.query(api.users.getUser, { userId })
     if (!user) {
       return new NextResponse("User not found", { status: 404 })
     }
@@ -30,7 +30,7 @@ export async function POST(req: Request) {
       success_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard?success=true`,
       cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard?canceled=true`,
       metadata: {
-        userId: user.id,
+        userId: userId,
       },
     })
 

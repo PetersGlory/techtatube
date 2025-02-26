@@ -31,10 +31,10 @@ export default defineSchema({
 
   subscriptions: defineTable({
     userId: v.string(),
+    status: v.string(),
     stripeCustomerId: v.string(),
     stripePriceId: v.string(),
     stripeSubscriptionId: v.string(),
-    status: v.string(),
     currentPeriodEnd: v.number(),
     createdAt: v.number(),
     updatedAt: v.number(),

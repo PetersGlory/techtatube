@@ -1,10 +1,13 @@
 import { NextResponse } from "next/server"
 import { auth } from "@clerk/nextjs"
 import { z } from "zod"
-import claude from "@/lib/claude"
 import { Ratelimit } from "@upstash/ratelimit"
 import { Redis } from "@upstash/redis"
-import { prisma } from "@/lib/prisma"
+import { ConvexHttpClient } from "convex/browser"
+import { api } from "@/convex/_generated/api"
+import claude from "@/lib/claude"
+
+const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!)
 
 const redis = new Redis({
   url: process.env.UPSTASH_REDIS_REST_URL!,
@@ -40,31 +43,33 @@ export async function POST(req: Request) {
 
     const { prompt, type, tone, length } = body
 
-    const user = await prisma.user.findUnique({
-      where: { clerkId: userId },
-      include: { subscription: true },
-    })
-
-    if (!user || !user.subscription || user.subscription.status !== "active") {
+    const subscription = await convex.query(api.subscriptions.getSubscription, { userId })
+    if (!subscription || subscription.status !== "active") {
       return new NextResponse("Subscription required", { status: 403 })
     }
 
-    const completion = await claude.complete({
-      prompt: `Generate a ${type} content with a ${tone} tone and ${length} length based on the following prompt: ${prompt}`,
-      max_tokens_to_sample: 2000,
+    const completion = await claude.messages.create({
+      messages: [
+        {
+          role: "user",
+          content: `Generate a ${type} content with a ${tone} tone and ${length} length based on the following prompt: ${prompt}`,
+        },
+      ],
       model: "claude-2",
+      max_tokens: 2000,
     })
 
-    const generatedContent = completion.completion
+    const generatedContent = completion.content[0].type === 'text' 
+      ? completion.content[0].text 
+      : "";
 
-    // Save the generated content to the database
-    await prisma.content.create({
-      data: {
-        title: prompt.slice(0, 50), // Use the first 50 characters of the prompt as the title
-        body: generatedContent,
-        type,
-        userId: user.id,
-      },
+    // Save to Convex instead of Prisma
+    await convex.mutation(api.content.createContent, {
+      title: prompt.slice(0, 50),
+      content: generatedContent,
+      type,
+      userId,
+      isPublished: true,
     })
 
     return NextResponse.json({ content: generatedContent })

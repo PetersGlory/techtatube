@@ -1,3 +1,16 @@
+// This file now serves as a reference for styling
+export const clerkStyles = {
+  formButtonPrimary: "bg-yellow-400 hover:bg-yellow-500 text-black",
+  card: "bg-black/40 border border-white/5 backdrop-blur-sm",
+  headerTitle: "text-white",
+  headerSubtitle: "text-gray-400",
+  socialButtonsBlockButton: "bg-black/40 border border-white/5 hover:bg-white/5 text-white",
+  formFieldInput: "bg-black/40 border-gray-800 text-white focus:border-yellow-400/50",
+  footerActionLink: "text-yellow-400 hover:text-yellow-500",
+  dividerLine: "bg-gray-800",
+  dividerText: "text-gray-400"
+};
+
 export const clerkTheme = {
   elements: {
     rootBox: "w-full",
