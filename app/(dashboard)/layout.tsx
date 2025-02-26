@@ -12,7 +12,7 @@ export default function DashboardLayout({
     <div className="min-h-screen flex flex-col">
       <header className="border-b">
         <div className="container mx-auto px-4 py-2 flex justify-between items-center">
-          <h1 className="text-2xl font-bold">AI Content Generator</h1>
+          <h1 className="text-2xl font-bold">TechtaTube</h1>
           <div className="flex items-center space-x-4">
             <OrgSwitcher />
             <Toggle />

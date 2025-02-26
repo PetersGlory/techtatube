@@ -131,7 +131,8 @@ export default function Home() {
           )}
         </motion.header>
 
-        <main className="flex-1 pt-32">
+        <main className="flex-1 pt-32 relative">
+        <div className="absolute inset-0 bg-gradient-to-b from-yellow-400/5 to-transparent"></div>
           {/* Hero Section */}
           <motion.section
             initial="initial"
@@ -140,7 +141,7 @@ export default function Home() {
             variants={staggerContainer}
             className="relative"
           >
-            <div className="container max-w-6xl mx-auto px-4">
+            <div className="container max-w-6xl mx-auto px-4 py-4 bg-transparent">
               <motion.div 
                 variants={fadeInUp}
                 className="text-center mb-16"
