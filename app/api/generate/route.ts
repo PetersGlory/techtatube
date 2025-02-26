@@ -48,6 +48,12 @@ export async function POST(req: Request) {
       return new NextResponse("Subscription required", { status: 403 })
     }
 
+    // Check usage limits
+    const usage = await convex.query(api.usage.getUsage, { userId })
+    if (usage.current >= usage.limit) {
+      return new NextResponse("Usage limit reached", { status: 403 })
+    }
+
     const completion = await claude.messages.create({
       messages: [
         {
@@ -71,6 +77,8 @@ export async function POST(req: Request) {
       userId,
       isPublished: true,
     })
+    // Increment usage after successful generation
+    await convex.mutation(api.usage.incrementUsage, { userId })
 
     return NextResponse.json({ content: generatedContent })
   } catch (error) {

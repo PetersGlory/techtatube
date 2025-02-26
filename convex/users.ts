@@ -30,20 +30,16 @@ export const getUser = query({
 
 export const createUser = mutation({
   args: {
-    email: v.string(),
     userId: v.string(),
+    email: v.string(),
   },
-  handler: async (
-    ctx: QueryCtx,
-    args: { email: string; userId: string }
-  ): Promise<Id<"users">> => {
-    const user = await ctx.db.insert("users", {
-      email: args.email,
+  handler: async (ctx, args) => {
+    return await ctx.db.insert("users", {
+      ...args,
       createdAt: Date.now(),
       updatedAt: Date.now(),
       usageLimit: 10,
       usageCount: 0,
     });
-    return user;
   },
 }); 

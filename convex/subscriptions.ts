@@ -28,4 +28,26 @@ export const getSubscription = query({
       .first();
     return subscription;
   },
+});
+
+export const updateSubscription = mutation({
+  args: {
+    userId: v.string(),
+    status: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const subscription = await ctx.db
+      .query("subscriptions")
+      .filter((q) => q.eq(q.field("userId"), args.userId))
+      .first();
+
+    if (!subscription) {
+      throw new Error("Subscription not found");
+    }
+
+    await ctx.db.patch(subscription._id, {
+      status: args.status,
+      updatedAt: Date.now(),
+    });
+  },
 }); 

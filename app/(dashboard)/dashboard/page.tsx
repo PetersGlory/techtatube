@@ -25,6 +25,8 @@ import {
   Tooltip,
   ResponsiveContainer
 } from 'recharts';
+import { FeatureGate } from "@/components/feature-gate";
+import { useAnalytics } from "@/hooks/use-analytics";
 
 export default function DashboardPage() {
   const { user } = useUser();
@@ -64,6 +66,8 @@ export default function DashboardPage() {
     views: item.views,
     engagement: item.engagement
   }));
+
+  useAnalytics(); // Track user analytics
 
   return (
     <div className="space-y-8">
@@ -111,53 +115,55 @@ export default function DashboardPage() {
       </div>
 
       {/* Analytics Chart */}
-      <div className="bg-black/40 rounded-xl border border-white/5 p-6">
-        <h2 className="text-xl font-bold mb-6">Performance Overview</h2>
-        <div className="h-[300px]">
-          <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={chartData}>
-              <defs>
-                <linearGradient id="colorViews" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3}/>
-                  <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
-                </linearGradient>
-                <linearGradient id="colorEngagement" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#22c55e" stopOpacity={0.3}/>
-                  <stop offset="95%" stopColor="#22c55e" stopOpacity={0}/>
-                </linearGradient>
-              </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-              <XAxis dataKey="date" stroke="#9ca3af" />
-              <YAxis stroke="#9ca3af" />
-              <Tooltip 
-                contentStyle={{ 
-                  backgroundColor: '#111827',
-                  border: '1px solid rgba(255,255,255,0.1)'
-                }}
-              />
-              <Area
-                type="monotone"
-                dataKey="views"
-                stroke="#3b82f6"
-                fillOpacity={1}
-                fill="url(#colorViews)"
-              />
-              <Area
-                type="monotone"
-                dataKey="engagement"
-                stroke="#22c55e"
-                fillOpacity={1}
-                fill="url(#colorEngagement)"
-              />
-            </AreaChart>
-          </ResponsiveContainer>
+      <FeatureGate feature="pro">
+        <div className="bg-black/40 rounded-xl border border-white/5 p-6">
+          <h2 className="text-xl font-bold mb-6">Performance Overview</h2>
+          <div className="h-[300px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={chartData}>
+                <defs>
+                  <linearGradient id="colorViews" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3}/>
+                    <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
+                  </linearGradient>
+                  <linearGradient id="colorEngagement" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#22c55e" stopOpacity={0.3}/>
+                    <stop offset="95%" stopColor="#22c55e" stopOpacity={0}/>
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+                <XAxis dataKey="date" stroke="#9ca3af" />
+                <YAxis stroke="#9ca3af" />
+                <Tooltip 
+                  contentStyle={{ 
+                    backgroundColor: '#111827',
+                    border: '1px solid rgba(255,255,255,0.1)'
+                  }}
+                />
+                <Area
+                  type="monotone"
+                  dataKey="views"
+                  stroke="#3b82f6"
+                  fillOpacity={1}
+                  fill="url(#colorViews)"
+                />
+                <Area
+                  type="monotone"
+                  dataKey="engagement"
+                  stroke="#22c55e"
+                  fillOpacity={1}
+                  fill="url(#colorEngagement)"
+                />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
         </div>
-      </div>
+      </FeatureGate>
 
       {/* Content Generator */}
       <div className="bg-black/40 rounded-xl border border-white/5 p-6">
         <h2 className="text-xl font-bold mb-4">Generate New Content</h2>
-      <ContentForm />
+        <ContentForm />
       </div>
 
       {/* Content Management */}

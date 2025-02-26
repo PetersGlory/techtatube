@@ -18,6 +18,7 @@ import type * as content from "../content.js";
 import type * as init from "../init.js";
 import type * as subscriptions from "../subscriptions.js";
 import type * as types from "../types.js";
+import type * as usage from "../usage.js";
 import type * as users from "../users.js";
 
 /**
@@ -34,6 +35,7 @@ declare const fullApi: ApiFromModules<{
   init: typeof init;
   subscriptions: typeof subscriptions;
   types: typeof types;
+  usage: typeof usage;
   users: typeof users;
 }>;
 export declare const api: FilterApi<
