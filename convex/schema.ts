@@ -17,16 +17,16 @@ export default defineSchema({
     updatedAt: v.number(),
   }),
 
-  contents: defineTable({
+  content: defineTable({
     title: v.string(),
     content: v.string(),
-    type: v.string(), // text, image, video
-    createdAt: v.number(),
-    updatedAt: v.number(),
+    type: v.string(),
     userId: v.string(),
     teamId: v.optional(v.string()),
     isPublished: v.boolean(),
     metadata: v.optional(v.any()),
+    createdAt: v.number(),
+    updatedAt: v.number(),
   }),
 
   subscriptions: defineTable({
@@ -45,4 +45,13 @@ export default defineSchema({
     value: v.any(),
     createdAt: v.number(),
   }),
+
+  analytics: defineTable({
+    userId: v.string(),
+    contentId: v.string(),
+    views: v.number(),
+    engagement: v.number(),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
 }); 
