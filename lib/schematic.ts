@@ -5,12 +5,11 @@ const schematic = new Schematic(
 );
 
 // Create React hooks
-export const { 
-  useFeatureFlag, 
-  useFeatureValue, 
-  useIdentify 
-} = schematic as unknown as {
-  useFeatureFlag: typeof Schematic.prototype.addFlagCheckListener,
-  useFeatureValue: typeof Schematic.prototype.addFlagValueListener,
-  useIdentify: typeof Schematic.prototype.identify
-};
+export const useFeatureFlag = (key: string, defaultValue: boolean = false) => 
+  schematic.addFlagCheckListener(key, () => defaultValue);
+
+export const useFeatureValue = <T>(key: string, defaultValue: T) => 
+  schematic.addFlagValueListener(key, () => defaultValue);
+
+export const useIdentify = () => 
+  (attributes: Record<string, any>) => schematic.identify(attributes);

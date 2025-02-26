@@ -8,7 +8,7 @@ export function useAnalytics() {
 
   useEffect(() => {
     if (user) {
-      identify(user.id, {
+      void identify({
         email: user.emailAddresses[0].emailAddress,
         name: `${user.firstName} ${user.lastName}`,
         createdAt: user.createdAt,
