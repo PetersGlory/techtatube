@@ -1,6 +1,7 @@
 import type React from "react"
 import { UserButton } from "@clerk/nextjs"
 import { Toggle } from "@/components/ui/toggle"
+import { OrgSwitcher } from "@/components/org-switcher"
 
 export default function DashboardLayout({
   children,
@@ -13,6 +14,7 @@ export default function DashboardLayout({
         <div className="container mx-auto px-4 py-2 flex justify-between items-center">
           <h1 className="text-2xl font-bold">AI Content Generator</h1>
           <div className="flex items-center space-x-4">
+            <OrgSwitcher />
             <Toggle />
             <UserButton afterSignOutUrl="/" />
           </div>
@@ -22,4 +24,3 @@ export default function DashboardLayout({
     </div>
   )
 }
-

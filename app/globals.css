@@ -43,6 +43,10 @@
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
     --radius: 0.5rem;
+    --org-primary: 222.2 47.4% 11.2%;
+    --org-secondary: 217.2 32.6% 17.5%;
+    --org-muted: 210 40% 96.1%;
+    --org-accent: 210 40% 96.1%;
   }
   .dark {
     --background: 0 0% 3.9%;
@@ -69,6 +73,10 @@
     --chart-3: 30 80% 55%;
     --chart-4: 280 65% 60%;
     --chart-5: 340 75% 55%;
+    --org-primary: 210 40% 98%;
+    --org-secondary: 217.2 32.6% 17.5%;
+    --org-muted: 217.2 32.6% 17.5%;
+    --org-accent: 217.2 32.6% 17.5%;
   }
 }
 
