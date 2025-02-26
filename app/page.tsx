@@ -1,7 +1,10 @@
+"use client";
+
 import { Button } from "@/components/ui/button";
 import { SignIn, SignInButton, SignUpButton } from "@clerk/nextjs";
 import { ArrowRight, ChevronRight, Command, BarChart2, FileText, PieChart, CheckCircle } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
+import { clerkTheme } from "@/lib/clerk-theme";
 
 // Animation variants
 const fadeInUp = {
@@ -62,16 +65,16 @@ export default function Home() {
           </nav>
 
           <div className="flex items-center gap-4">
-            <SignInButton mode="modal">
+          <SignInButton mode="modal">
               <Button variant="ghost" className="text-gray-400 hover:text-white">
                 Sign In
               </Button>
-            </SignInButton>
-            <SignUpButton mode="modal">
-              <Button className="bg-yellow-400 text-black hover:bg-yellow-500">
-                Get Started
-              </Button>
-            </SignUpButton>
+          </SignInButton>
+          <SignUpButton mode="modal">
+            <Button className="bg-yellow-400 text-black hover:bg-yellow-500">
+              Get Started
+            </Button>
+          </SignUpButton>
           </div>
         </div>
       </motion.header>
@@ -215,7 +218,14 @@ export default function Home() {
                 </div>
                 
                 <div className="space-y-4">
-                  <SignIn />
+                  <SignIn 
+                    appearance={{
+                      elements: {
+                        card: "bg-black/40 border border-white/5",
+                        formButtonPrimary: "bg-yellow-400 hover:bg-yellow-500 text-black",
+                      }
+                    }}
+                  />
                 </div>
 
                 {/* Customer List Preview */}
