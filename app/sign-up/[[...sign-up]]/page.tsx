@@ -1,5 +1,12 @@
 import { SignUp } from "@clerk/nextjs";
 
+export function generateStaticParams() {
+  return [
+    { "sign-up": [] },
+    { "sign-up": ["callback"] }
+  ];
+}
+
 export default function SignUpPage() {
   return (
     <div className="flex items-center justify-center min-h-screen">
