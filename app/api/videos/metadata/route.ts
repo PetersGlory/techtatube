@@ -7,6 +7,8 @@ import { showToast } from "@/lib/toast-utils";
 
 const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
 
+export const runtime = 'edge';
+
 export async function POST(req: Request) {
   try {
     const { userId } = auth();

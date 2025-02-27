@@ -1,24 +1,16 @@
-import { authMiddleware, clerkClient } from "@clerk/nextjs";
- 
+import { authMiddleware } from "@clerk/nextjs";
+
 export default authMiddleware({
-  publicRoutes: ["/", "/api/webhook/stripe"],
-  signInUrl: "/dashboard",
-  ignoredRoutes: ["/api/webhook/stripe"],
-  afterAuth: async (auth, req) => {
-    if (auth.userId && auth.orgId) {
-      const user = await clerkClient.users.getUser(auth.userId);
-      const org = await clerkClient.organizations.getOrganization({ organizationId: auth.orgId });
-      
-      // You can set custom roles and permissions here
-      auth.sessionClaims = {
-        ...auth.sessionClaims,
-        role: user.publicMetadata.role || "member",
-        orgRole: auth.orgRole,
-      };
-    }
-  }
+  // Public routes that don't require authentication
+  publicRoutes: [
+    "/",
+    "/pricing",
+    "/api/webhook/stripe",
+    "/sign-in",
+    "/sign-up",
+  ],
 });
 
 export const config = {
-  matcher: ['/((?!.+\\.[\\w]+$|_next).*)', '/', '/(api|trpc)(.*)'],
+  matcher: ["/((?!.+\\.[\\w]+$|_next).*)", "/", "/(api|trpc)(.*)"],
 };

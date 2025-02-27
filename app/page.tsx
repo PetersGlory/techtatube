@@ -141,8 +141,7 @@ export default function Home() {
           {isMenuOpen && (
             <motion.div 
               initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}              exit={{ opacity: 0, y: -10 }}
               className="md:hidden absolute top-16 left-0 right-0 bg-[#0A0A0A] border-b border-gray-800/50"
             >
               <div className="container py-4">
