@@ -2,17 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { SignIn, SignInButton, SignUpButton } from "@clerk/nextjs";
-import { 
-  ChevronRight, 
-  Command, 
-  BarChart2, 
-  FileText, 
-  Youtube,
-  Sparkles,
-  CheckCircle,
-  Menu,
-  Check
-} from "lucide-react";
+import { ChevronRight, Command, BarChart2, FileText, PieChart, CheckCircle, Menu, Check, Youtube, Sparkles } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import { clerkTheme } from "@/lib/clerk-theme";
 import { useState } from "react";
@@ -46,38 +36,6 @@ const slideIn = {
   animate: { x: 0, opacity: 1 },
   transition: { duration: 0.5 }
 };
-
-const features = [
-  {
-    icon: <Youtube className="h-6 w-6" />,
-    title: "Video Processing",
-    description: "Upload YouTube videos and get instant transcripts",
-  },
-  {
-    icon: <Sparkles className="h-6 w-6" />,
-    title: "AI Analysis",
-    description: "Get AI-powered insights, summaries, and key points",
-  },
-  {
-    icon: <BarChart2 className="h-6 w-6" />,
-    title: "Analytics",
-    description: "Track performance and engagement metrics",
-  },
-  {
-    icon: <FileText className="h-6 w-6" />,
-    title: "Content Insights",
-    description: "Understand sentiment and content ratings",
-  },
-];
-
-const benefits = [
-  "Instant video transcription",
-  "AI-powered content analysis",
-  "Sentiment analysis",
-  "Content rating detection",
-  "Key points extraction",
-  "Tag suggestions",
-];
 
 export default function Home() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -141,7 +99,8 @@ export default function Home() {
           {isMenuOpen && (
             <motion.div 
               initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}              exit={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
               className="md:hidden absolute top-16 left-0 right-0 bg-[#0A0A0A] border-b border-gray-800/50"
             >
               <div className="container py-4">
@@ -179,77 +138,168 @@ export default function Home() {
           {/* Hero Section */}
           <motion.section
             initial="initial"
-            whileInView="animate"
-            viewport={{ once: true }}
+            animate="animate"
             variants={staggerContainer}
-            className="relative"
+            className="relative min-h-screen flex items-center justify-center overflow-hidden"
           >
-            <div className="container max-w-6xl mx-auto px-4 py-4 bg-transparent">
+            {/* Gradient Background */}
+            <div className="absolute inset-0 bg-gradient-to-br from-yellow-400/10 via-purple-400/10 to-transparent" />
+            
+            {/* Animated Circles */}
+            <div className="absolute inset-0">
+              <div className="absolute top-20 left-20 w-72 h-72 bg-yellow-400/20 rounded-full blur-3xl animate-pulse" />
+              <div className="absolute bottom-20 right-20 w-96 h-96 bg-purple-400/20 rounded-full blur-3xl animate-pulse delay-1000" />
+            </div>
+
+            <div className="container mx-auto px-4 relative z-10">
               <motion.div 
                 variants={fadeInUp}
-                className="text-center mb-16"
+                className="max-w-4xl mx-auto text-center"
               >
-                <motion.div 
-                  variants={scaleIn}
-                  className="inline-flex items-center bg-white/5 rounded-full px-4 py-1.5 mb-8 border border-white/10"
-                >
-                  <span className="text-sm">🚀 AI-Powered Content Creation</span>
-                </motion.div>
-                
                 <motion.h1 
                   variants={fadeInUp}
-                  className="text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight mb-8"
+                  className="text-5xl md:text-7xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-yellow-400 to-purple-400"
                 >
-                  Smart Solutions,<span className="text-gray-400">And</span><br />
-                  Simple <span className="text-yellow-400">Interface</span>
+                  Transform Your Content Creation
                 </motion.h1>
                 
-                <p className="text-gray-400 max-w-2xl mx-auto mb-12 text-lg">
-                  The power of AI-driven content creation, providing intelligent insights and 
-                  predictive analytics to elevate your online presence.
-                </p>
+                <motion.p 
+                  variants={fadeInUp}
+                  className="text-xl md:text-2xl text-gray-300 mb-8 max-w-2xl mx-auto"
+                >
+                  Unlock the power of AI to analyze, optimize, and enhance your video content with TechtaTube.
+                </motion.p>
 
-                <div className="flex gap-4">
+                <motion.div 
+                  variants={fadeInUp}
+                  className="flex flex-col sm:flex-row gap-4 justify-center"
+                >
                   <SignUpButton mode="modal">
-                    <Button size="lg">
-                      Get Started
+                    <Button size="lg" className="bg-gradient-to-r from-yellow-400 to-purple-400 hover:from-yellow-500 hover:to-purple-500">
+                      Get Started Free
                       <ChevronRight className="ml-2 h-4 w-4" />
                     </Button>
                   </SignUpButton>
                   
                   <Link href={routes.pricing}>
-                    <Button variant="outline" size="lg">
+                    <Button size="lg" variant="outline" className="border-white/20 hover:bg-white/10">
                       View Pricing
                     </Button>
                   </Link>
-                </div>
+                </motion.div>
+              </motion.div>
+            </div>
+
+            {/* Scroll Indicator */}
+            <motion.div 
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 1, duration: 0.5 }}
+              className="absolute bottom-8 left-1/2 transform -translate-x-1/2"
+            >
+              <div className="w-6 h-10 border-2 border-white/20 rounded-full flex items-start justify-center p-2">
+                <motion.div
+                  animate={{ y: [0, 12, 0] }}
+                  transition={{ repeat: Infinity, duration: 1.5 }}
+                  className="w-1 h-1 bg-white rounded-full"
+                />
+              </div>
+            </motion.div>
+          </motion.section>
+
+          {/* Feature Cards */}
+          <motion.section
+            initial="initial"
+            whileInView="animate"
+            viewport={{ once: true }}
+            className="py-24 relative bg-black/30"
+          >
+            <div className="container mx-auto px-4">
+              <motion.div
+                variants={fadeInUp}
+                className="text-center max-w-3xl mx-auto mb-16"
+              >
+                <h2 className="text-3xl md:text-4xl font-bold mb-6">
+                  Powerful Features for Content Creators
+                </h2>
+                <p className="text-gray-400 text-lg">
+                  Everything you need to analyze and optimize your video content
+                </p>
               </motion.div>
 
-              {/* Feature Cards */}
-              <motion.div 
-                variants={staggerContainer}
-                initial="initial"
-                whileInView="animate"
-                viewport={{ once: true }}
-                className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mt-20"
-              >
-                {features.map((feature, i) => (
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
+                {[
+                  {
+                    icon: <Youtube className="h-6 w-6" />,
+                    title: "Video Processing",
+                    description: "Upload YouTube videos and get instant transcripts with AI-powered analysis",
+                    gradient: "from-yellow-400 to-orange-500"
+                  },
+                  {
+                    icon: <Sparkles className="h-6 w-6" />,
+                    title: "AI Analysis",
+                    description: "Get intelligent insights, summaries, and key points from your video content",
+                    gradient: "from-purple-400 to-pink-500"
+                  },
+                  {
+                    icon: <BarChart2 className="h-6 w-6" />,
+                    title: "Analytics",
+                    description: "Track performance metrics and engagement analytics in real-time",
+                    gradient: "from-blue-400 to-cyan-500"
+                  },
+                  {
+                    icon: <FileText className="h-6 w-6" />,
+                    title: "Content Insights",
+                    description: "Understand sentiment analysis and content ratings automatically",
+                    gradient: "from-green-400 to-emerald-500"
+                  },
+                  {
+                    icon: <CheckCircle className="h-6 w-6" />,
+                    title: "Smart Suggestions",
+                    description: "Receive AI-powered recommendations for content optimization",
+                    gradient: "from-red-400 to-rose-500"
+                  },
+                  {
+                    icon: <Command className="h-6 w-6" />,
+                    title: "Easy Integration",
+                    description: "Seamlessly connect with your existing YouTube content workflow",
+                    gradient: "from-indigo-400 to-violet-500"
+                  }
+                ].map((feature, i) => (
                   <motion.div
                     key={feature.title}
-                    variants={fadeInUp}
-                    whileHover={{ scale: 1.02 }}
-                    className="bg-black/40 rounded-2xl p-6 border border-white/5 backdrop-blur-sm"
+                    variants={{
+                      initial: { opacity: 0, y: 20 },
+                      animate: { 
+                        opacity: 1, 
+                        y: 0,
+                        transition: { delay: i * 0.1 }
+                      }
+                    }}
+                    whileHover={{ y: -5, transition: { duration: 0.2 } }}
+                    className="relative group"
                   >
-                    <div className="text-yellow-400 mb-4">{feature.icon}</div>
-                    <h3 className="text-lg font-semibold mb-2">{feature.title}</h3>
-                    <p className="text-gray-400 text-sm">{feature.description}</p>
+                    <div className="absolute inset-0 bg-gradient-to-r opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-xl blur-xl -z-10" />
+                    <div className="bg-black/40 border border-white/5 rounded-xl p-6 backdrop-blur-sm relative overflow-hidden">
+                      {/* Gradient Orb */}
+                      <div className={`absolute -right-4 -top-4 w-24 h-24 bg-gradient-to-r ${feature.gradient} rounded-full opacity-20 blur-2xl group-hover:opacity-30 transition-opacity duration-300`} />
+                      
+                      <div className={`inline-flex p-2 rounded-lg bg-gradient-to-r ${feature.gradient} mb-4`}>
+                        {feature.icon}
+                      </div>
+                      
+                      <h3 className="text-lg font-semibold mb-2">{feature.title}</h3>
+                      <p className="text-gray-400 text-sm leading-relaxed">
+                        {feature.description}
+                      </p>
+                    </div>
                   </motion.div>
                 ))}
-              </motion.div>
+              </div>
             </div>
           </motion.section>
 
-          {/* Benefits Section */}
+          {/* Feature Cards */}
           <motion.section
             initial="initial"
             whileInView="animate"
@@ -396,7 +446,7 @@ export default function Home() {
                         <span>Community support</span>
                       </li>
                     </ul>
-                    <Button className="w-full bg-white/5 hover:bg-white/10">
+                    <Button className="w-full text-gray-800 bg-white/90 hover:bg-white/80">
                       Get Started
                     </Button>
                   </div>
@@ -477,7 +527,7 @@ export default function Home() {
                         <span>Custom integrations</span>
                       </li>
                     </ul>
-                    <Button className="w-full bg-white/5 hover:bg-white/10">
+                    <Button className="w-full text-gray-800 bg-white/90 hover:bg-white/80">
                       Contact Sales
                     </Button>
                   </div>

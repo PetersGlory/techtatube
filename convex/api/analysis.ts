@@ -12,6 +12,16 @@ export const api = {
     },
   }),
 
+  getVideoAnalyses: query({
+    args: { userId: v.string() },
+    handler: async (ctx, args) => {
+      if (args.userId === "skip") return [];
+      return await ctx.db
+        .query("analysis")
+        .collect();
+    },
+  }),
+
   saveAnalysis: mutation({
     args: {
       videoId: v.id("videos"),

@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import { useQuery, useMutation } from "convex/react";
@@ -5,7 +6,7 @@ import { api } from "@/convex/_generated/api";
 import { useUser } from "@clerk/nextjs";
 // import { motion } from "framer-motion";
 import { ContentForm } from "@/components/content-form"
-import { BarChart, FileText, Users, ArrowUpRight, Search, Filter, Edit2, Trash2 } from "lucide-react";
+import { BarChart, FileText, Users, ArrowUpRight, Search, Filter, Edit2, Trash2, Youtube, Sparkles, TrendingUp, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -27,9 +28,15 @@ import {
 } from 'recharts';
 import { FeatureGate } from "@/components/feature-gate";
 import { useAnalytics } from "@/hooks/use-analytics";
+import { Card } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
+import Link from "next/link";
+import { routes } from "@/lib/navigation";
+import { formatDistanceToNow } from "date-fns";
+import { Video } from "@/convex/types";
 
 export default function DashboardPage() {
-  const { user } = useUser();
+  const { user, isLoaded } = useUser();
   const content = useQuery(api.content.getContentByUser, { 
     userId: user?.id ?? "" 
   });
@@ -67,10 +74,122 @@ export default function DashboardPage() {
     engagement: item.engagement
   }));
 
-  useAnalytics(); // Track user analytics
+  const videos = useQuery(api.videos.getUserVideos, {
+    userId: user?.id ?? "skip",
+  }) as Video[] | undefined;
+
+  const usage = useQuery(api.usage.getUsage, {
+    userId: user?.id ?? "skip",
+  });
+
+  if (!isLoaded) {
+    return <LoadingSkeleton />;
+  }
+
+  const recentVideos = videos?.slice(0, 3) ?? [];
+  const completedVideos = videos?.filter(v => v.status === "completed") ?? [];
+  const processingVideos = videos?.filter(v => v.status === "processing") ?? [];
+
+  // useAnalytics(); // Track user analytics
 
   return (
     <div className="space-y-8">
+      {/* Welcome Section */}
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-3xl font-bold">Welcome back, {user?.firstName}</h1>
+          <p className="text-muted-foreground mt-1">
+            Here&#39;s what&lsquo;s happening with your videos
+          </p>
+        </div>
+        <Link href={routes.videos}>
+          <Button>
+            <Youtube className="mr-2 h-4 w-4" />
+            Process New Video
+          </Button>
+        </Link>
+      </div>
+
+      {/* Stats Grid */}
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <StatsCard
+          title="Total Videos"
+          value={videos?.length ?? 0}
+          icon={<Youtube className="h-4 w-4" />}
+          description="Total videos processed"
+        />
+        <StatsCard
+          title="Completed"
+          value={completedVideos.length}
+          icon={<Sparkles className="h-4 w-4" />}
+          description="Successfully analyzed"
+        />
+        <StatsCard
+          title="Processing"
+          value={processingVideos.length}
+          icon={<Clock className="h-4 w-4" />}
+          description="Currently in progress"
+        />
+        <StatsCard
+          title="Usage"
+          value={`${usage?.current ?? 0}/${usage?.limit ?? 0}`}
+          icon={<TrendingUp className="h-4 w-4" />}
+          description="Monthly video quota"
+        />
+      </div>
+
+      {/* Recent Videos */}
+      <Card className="p-6">
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-lg font-semibold">Recent Videos</h2>
+          <Link href={routes.videos}>
+            <Button variant="ghost" size="sm">
+              View All
+            </Button>
+          </Link>
+        </div>
+
+        <div className="space-y-4">
+          {recentVideos.length === 0 ? (
+            <div className="text-center py-8 text-muted-foreground">
+              <FileText className="h-8 w-8 mx-auto mb-2 opacity-50" />
+              <p>No videos processed yet</p>
+              <Link href={routes.videos} className="text-sm text-primary hover:underline">
+                Process your first video
+              </Link>
+            </div>
+          ) : (
+            recentVideos.map((video) => (
+              <div 
+                key={video._id} 
+                className="flex items-center gap-4 p-4 rounded-lg bg-muted/50 hover:bg-muted transition-colors"
+              >
+                {video.thumbnailUrl && (
+                  <img 
+                    src={video.thumbnailUrl} 
+                    alt={video.title}
+                    className="w-24 h-16 object-cover rounded"
+                  />
+                )}
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-medium truncate">{video.title}</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Processed {formatDistanceToNow(video.createdAt)} ago
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Link href={`/videos/${video._id}`}>
+                    <Button variant="ghost" size="sm">
+                      View Analysis
+                    </Button>
+                  </Link>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+      </Card>
+
       {/* Stats Overview */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="bg-black/40 p-6 rounded-xl border border-white/5">
@@ -244,5 +363,67 @@ export default function DashboardPage() {
       </div>
     </div>
   )
+}
+
+function StatsCard({ 
+  title, 
+  value, 
+  icon, 
+  description 
+}: { 
+  title: string;
+  value: number | string;
+  icon: React.ReactNode;
+  description: string;
+}) {
+  return (
+    <Card className="p-6">
+      <div className="flex items-center gap-2">
+        <div className="p-2 bg-primary/10 rounded-lg text-primary">
+          {icon}
+        </div>
+        <span className="text-sm font-medium">{title}</span>
+      </div>
+      <div className="mt-4">
+        <div className="text-2xl font-bold">{value}</div>
+        <p className="text-sm text-muted-foreground">{description}</p>
+      </div>
+    </Card>
+  );
+}
+
+function LoadingSkeleton() {
+  return (
+    <div className="space-y-8">
+      <div className="flex justify-between items-center">
+        <div>
+          <Skeleton className="h-8 w-64" />
+          <Skeleton className="h-4 w-48 mt-1" />
+        </div>
+        <Skeleton className="h-10 w-32" />
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        {Array(4).fill(0).map((_, i) => (
+          <Card key={i} className="p-6">
+            <Skeleton className="h-8 w-24 mb-4" />
+            <Skeleton className="h-6 w-16" />
+          </Card>
+        ))}
+      </div>
+
+      <Card className="p-6">
+        <div className="flex justify-between items-center mb-6">
+          <Skeleton className="h-6 w-32" />
+          <Skeleton className="h-8 w-20" />
+        </div>
+        <div className="space-y-4">
+          {Array(3).fill(0).map((_, i) => (
+            <Skeleton key={i} className="h-20 w-full" />
+          ))}
+        </div>
+      </Card>
+    </div>
+  );
 }
 
