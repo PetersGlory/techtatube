@@ -19,6 +19,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
 import { showToast } from "@/lib/toast-utils";
+import { useEntitlements } from "@/hooks/use-entitlements";
+import { EntitlementsResponse } from "@/convex/types";
 
 const formSchema = z.object({
   youtubeUrl: z
@@ -32,6 +34,7 @@ export function YoutubeForm() {
   const { toast } = useToast();
   const createVideo = useMutation(api.videos.createVideo);
   const [isLoading, setIsLoading] = useState(false);
+  const { hasFeatureAccess, entitlements } = useEntitlements();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -43,6 +46,16 @@ export function YoutubeForm() {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     if (!user) {
       showToast.error("Authentication Required", "Please sign in to continue.");
+      return;
+    }
+
+    // Check if user has access to video processing
+    const hasAccess = await hasFeatureAccess("video_processing");
+    if (!hasAccess) {
+      showToast.error(
+        "Feature Unavailable", 
+        "Please upgrade your plan to process more videos."
+      );
       return;
     }
 
@@ -104,6 +117,11 @@ export function YoutubeForm() {
             </FormItem>
           )}
         />
+        {entitlements && (
+          <p className="text-sm text-muted-foreground">
+            {entitlements.current} / {entitlements.limit} videos processed this month
+          </p>
+        )}
         <Button type="submit" disabled={isLoading}>
           {isLoading ? "Processing..." : "Submit"}
         </Button>

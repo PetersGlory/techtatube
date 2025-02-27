@@ -7,12 +7,13 @@ import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { VideoMetrics } from "@/components/video-metrics";
 import { VideoAnalysisList } from "@/components/video-analysis-list";
+import { Video } from "@/convex/types";
 
 export default function AnalysisPage() {
   const { user } = useUser();
   const videos = useQuery(api.videos.getUserVideos, { 
     userId: user?.id ?? "" 
-  });
+  }) as Video[] | undefined;
 
   return (
     <div className="container mx-auto py-10">
@@ -41,4 +42,4 @@ export default function AnalysisPage() {
       </div>
     </div>
   );
-} 
+}

@@ -97,4 +97,25 @@ export default defineSchema({
     createdAt: v.number(),
     updatedAt: v.number(),
   }),
+
+  userEntitlements: defineTable({
+    userId: v.string(),
+    plan: v.string(), // "free", "pro", "enterprise"
+    features: v.array(v.string()), // ["title_generation", "image_generation", etc]
+    monthlyQuota: v.number(),
+    usageCount: v.number(),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  }),
+
+  generationJobs: defineTable({
+    userId: v.string(),
+    videoId: v.id("videos"),
+    type: v.string(), // "title", "image", "transcript"
+    status: v.string(), // "pending", "processing", "completed", "failed"
+    result: v.optional(v.string()),
+    metadata: v.optional(v.any()),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  }),
 }); 

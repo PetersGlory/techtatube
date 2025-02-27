@@ -6,12 +6,13 @@ import { useUser } from "@clerk/nextjs";
 import { YoutubeForm } from "@/components/youtube-form";
 import { VideoList } from "@/components/video-list";
 import { Card } from "@/components/ui/card";
+import { Video } from "@/convex/types";
 
 export default function VideosPage() {
   const { user } = useUser();
   const videos = useQuery(api.videos.getUserVideos, {
     userId: user?.id ?? "",
-  });
+  }) as Video[] | undefined;
 
   return (
     <div className="container mx-auto py-10">
@@ -31,4 +32,4 @@ export default function VideosPage() {
       </div>
     </div>
   );
-} 
+}

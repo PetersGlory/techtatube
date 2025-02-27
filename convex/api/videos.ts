@@ -35,11 +35,16 @@ export const api = {
   getUserVideos: query({
     args: { userId: v.string() },
     handler: async (ctx, args) => {
-      return await ctx.db
+      const videos = await ctx.db
         .query("videos")
         .filter((q) => q.eq(q.field("userId"), args.userId))
         .order("desc")
         .collect();
+
+      return videos.map(video => ({
+        ...video,
+        status: video.status as "pending" | "processing" | "completed" | "failed"
+      }));
     },
   }),
 

@@ -14,6 +14,14 @@ export async function POST(req: Request) {
       showToast.error("Unauthorized", "Please sign in to continue.");
       return new NextResponse("Unauthorized", { status: 401 });
     }
+    // Check feature access
+    const usage = await convex.query(api.usage.getUsage, { userId });
+    const hasAccess = usage && usage.current < usage.limit;
+
+    if (!hasAccess) {
+      showToast.error("Access Denied", "Please upgrade your plan to process more videos.");
+      return new NextResponse("Access Denied", { status: 403 });
+    }
 
     const { videoId, youtubeId } = await req.json();
     showToast.loading("Processing Transcript", "Extracting video transcript...");
@@ -26,6 +34,8 @@ export async function POST(req: Request) {
       content,
       language: 'en',
     });
+    // Increment usage after successful processing
+    await convex.mutation(api.usage.incrementUsage, { userId });
 
     // Update video status
     await convex.mutation(api.videos.updateVideoStatus, {

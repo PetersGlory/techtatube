@@ -13,8 +13,10 @@ import type {
   FilterApi,
   FunctionReference,
 } from "convex/server";
+import type * as api_entitlements from "../api/entitlements.js";
 import type * as api_index from "../api/index.js";
 import type * as api_transcripts from "../api/transcripts.js";
+import type * as api_usage from "../api/usage.js";
 import type * as api_videos from "../api/videos.js";
 import type * as config from "../config.js";
 import type * as content from "../content.js";
@@ -36,8 +38,10 @@ import type * as videos from "../videos.js";
  * ```
  */
 declare const fullApi: ApiFromModules<{
+  "api/entitlements": typeof api_entitlements;
   "api/index": typeof api_index;
   "api/transcripts": typeof api_transcripts;
+  "api/usage": typeof api_usage;
   "api/videos": typeof api_videos;
   config: typeof config;
   content: typeof content;

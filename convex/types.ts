@@ -41,11 +41,11 @@ export interface Content {
 
 export interface Video {
   _id: Id<"videos">;
-  _creationTime: number;
+  _creationTime?: number;
   userId: string;
-  youtubeUrl: string;
-  youtubeId: string;
-  title: string;
+  youtubeUrl?: string;
+  youtubeId?: string;
+  title?: string;
   description?: string;
   thumbnailUrl?: string;
   duration?: string;
@@ -61,6 +61,27 @@ export interface Transcript {
   userId: string;
   content: string;
   language: string;
+  createdAt: number;
+  updatedAt: number;
+}
+
+export interface UserEntitlements {
+  _id: Id<"userEntitlements">;
+  _creationTime: number;
+  userId: string;
+  plan: "free" | "pro" | "enterprise";
+  features: string[];
+  monthlyQuota: number;
+  usageCount: number;
+  createdAt: number;
+  updatedAt: number;
+}
+
+export interface EntitlementsResponse {
+  plan: string;
+  features: string[];
+  monthlyQuota: number;
+  usageCount: number;
   createdAt: number;
   updatedAt: number;
 } 

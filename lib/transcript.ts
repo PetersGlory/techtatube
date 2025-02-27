@@ -1,4 +1,4 @@
-import { YoutubeTranscript } from 'youtube-transcript-api';
+import { YoutubeTranscript } from 'youtube-transcript';
 
 interface TranscriptPart {
   text: string;
@@ -8,13 +8,11 @@ interface TranscriptPart {
 
 export async function getTranscript(videoId: string, language = 'en') {
   try {
-    const transcript = await YoutubeTranscript.fetchTranscript(videoId, {
-      lang: language,
-    });
+    const transcript = await YoutubeTranscript.fetchTranscript(videoId);
 
     // Combine all transcript parts into one text
     const fullText = transcript
-      .map((part: TranscriptPart) => part.text)
+      .map(part => part.text)
       .join(' ')
       .replace(/\s+/g, ' ')
       .trim();
