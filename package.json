@@ -14,6 +14,7 @@
     "@anthropic-ai/sdk": "^0.37.0",
     "@clerk/clerk-react": "^5.23.0",
     "@clerk/nextjs": "^4.29.9",
+    "@google/generative-ai": "^0.22.0",
     "@hookform/resolvers": "^3.9.0",
     "@next/swc-wasm-nodejs": "13.5.1",
     "@radix-ui/react-accordion": "^1.2.0",

@@ -3,6 +3,7 @@ import { auth } from "@clerk/nextjs";
 import { ConvexHttpClient } from "convex/browser";
 import { api } from "@/convex/_generated/api";
 import { getTranscript } from "@/lib/transcript";
+import { analyzeVideoContent } from "@/lib/gemini";
 import { showToast } from "@/lib/toast-utils";
 
 const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
@@ -34,6 +35,16 @@ export async function POST(req: Request) {
       content,
       language: 'en',
     });
+
+    // Analyze with Gemini
+    const analysis = await analyzeVideoContent(content);
+    
+    // Save analysis
+    await convex.mutation(api.analysis.saveAnalysis, {
+      videoId,
+      analysis,
+    });
+
     // Increment usage after successful processing
     await convex.mutation(api.usage.incrementUsage, { userId });
 
@@ -46,7 +57,7 @@ export async function POST(req: Request) {
     showToast.success("Transcript Ready", "Video transcript has been processed.");
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Error fetching transcript:", error);
+    console.error("Error processing video:", error);
     
     // Update video status to failed
     const { videoId } = await req.json();

@@ -118,4 +118,15 @@ export default defineSchema({
     createdAt: v.number(),
     updatedAt: v.number(),
   }),
+
+  analysis: defineTable({
+    videoId: v.id("videos"),
+    summary: v.string(),
+    keyPoints: v.array(v.string()),
+    sentiment: v.string(),
+    suggestedTags: v.array(v.string()),
+    contentRating: v.string(),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  }),
 }); 
