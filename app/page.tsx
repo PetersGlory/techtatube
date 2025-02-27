@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { SignIn, SignInButton, SignUpButton } from "@clerk/nextjs";
-import { ChevronRight, Command, BarChart2, FileText, PieChart, CheckCircle, Menu } from "lucide-react";
+import { ChevronRight, Command, BarChart2, FileText, PieChart, CheckCircle, Menu, Check } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import { clerkTheme } from "@/lib/clerk-theme";
 import { useState } from "react";
@@ -316,6 +316,180 @@ export default function Home() {
                   </div>
                 </motion.div>
               </div>
+            </div>
+          </motion.section>
+
+          {/* Pricing Section */}
+          <motion.section
+            initial="initial"
+            whileInView="animate"
+            viewport={{ once: true }}
+            variants={staggerContainer}
+            className="py-20"
+          >
+            <div className="container max-w-6xl mx-auto px-4">
+              <div className="text-center mb-16">
+                <motion.div variants={fadeInUp}>
+                  <div className="inline-flex items-center bg-yellow-400/10 rounded-full px-4 py-1.5 mb-8">
+                    <span className="text-yellow-400 text-sm">Pricing Plans</span>
+                  </div>
+                  <h2 className="text-4xl font-bold mb-4">Choose Your Perfect Plan</h2>
+                  <p className="text-gray-400 max-w-2xl mx-auto">
+                    Select the plan that best fits your needs. All plans include our core features with different usage limits.
+                  </p>
+                </motion.div>
+              </div>
+
+              <motion.div 
+                variants={staggerContainer}
+                className="grid md:grid-cols-3 gap-8"
+              >
+                {/* Free Plan */}
+                <motion.div
+                  variants={fadeInUp}
+                  className="bg-black/40 rounded-2xl p-8 border border-white/5 backdrop-blur-sm relative overflow-hidden"
+                >
+                  <div className="space-y-4">
+                    <h3 className="text-xl font-semibold">Starter</h3>
+                    <div className="flex items-baseline">
+                      <span className="text-4xl font-bold">$0</span>
+                      <span className="text-gray-400 ml-2">/month</span>
+                    </div>
+                    <p className="text-gray-400">Perfect for trying out our features</p>
+                    <ul className="space-y-3 py-6">
+                      <li className="flex items-center">
+                        <Check className="h-5 w-5 text-yellow-400 mr-2" />
+                        <span>5 videos per month</span>
+                      </li>
+                      <li className="flex items-center">
+                        <Check className="h-5 w-5 text-yellow-400 mr-2" />
+                        <span>Basic analytics</span>
+                      </li>
+                      <li className="flex items-center">
+                        <Check className="h-5 w-5 text-yellow-400 mr-2" />
+                        <span>Community support</span>
+                      </li>
+                    </ul>
+                    <Button className="w-full bg-white/5 hover:bg-white/10">
+                      Get Started
+                    </Button>
+                  </div>
+                </motion.div>
+
+                {/* Pro Plan */}
+                <motion.div
+                  variants={fadeInUp}
+                  className="bg-yellow-400/5 rounded-2xl p-8 border border-yellow-400/20 backdrop-blur-sm relative overflow-hidden"
+                >
+                  <div className="absolute top-4 right-4">
+                    <span className="bg-yellow-400 text-black text-xs font-semibold px-3 py-1 rounded-full">
+                      Popular
+                    </span>
+                  </div>
+                  <div className="space-y-4">
+                    <h3 className="text-xl font-semibold">Pro</h3>
+                    <div className="flex items-baseline">
+                      <span className="text-4xl font-bold">$29</span>
+                      <span className="text-gray-400 ml-2">/month</span>
+                    </div>
+                    <p className="text-gray-400">For content creators and small teams</p>
+                    <ul className="space-y-3 py-6">
+                      <li className="flex items-center">
+                        <Check className="h-5 w-5 text-yellow-400 mr-2" />
+                        <span>50 videos per month</span>
+                      </li>
+                      <li className="flex items-center">
+                        <Check className="h-5 w-5 text-yellow-400 mr-2" />
+                        <span>Advanced analytics</span>
+                      </li>
+                      <li className="flex items-center">
+                        <Check className="h-5 w-5 text-yellow-400 mr-2" />
+                        <span>Priority support</span>
+                      </li>
+                      <li className="flex items-center">
+                        <Check className="h-5 w-5 text-yellow-400 mr-2" />
+                        <span>Custom branding</span>
+                      </li>
+                    </ul>
+                    <Button className="w-full bg-yellow-400 text-black hover:bg-yellow-500">
+                      Start Pro Trial
+                    </Button>
+                  </div>
+                </motion.div>
+
+                {/* Enterprise Plan */}
+                <motion.div
+                  variants={fadeInUp}
+                  className="bg-black/40 rounded-2xl p-8 border border-white/5 backdrop-blur-sm relative overflow-hidden"
+                >
+                  <div className="space-y-4">
+                    <h3 className="text-xl font-semibold">Enterprise</h3>
+                    <div className="flex items-baseline">
+                      <span className="text-4xl font-bold">$99</span>
+                      <span className="text-gray-400 ml-2">/month</span>
+                    </div>
+                    <p className="text-gray-400">For large teams and organizations</p>
+                    <ul className="space-y-3 py-6">
+                      <li className="flex items-center">
+                        <Check className="h-5 w-5 text-yellow-400 mr-2" />
+                        <span>Unlimited videos</span>
+                      </li>
+                      <li className="flex items-center">
+                        <Check className="h-5 w-5 text-yellow-400 mr-2" />
+                        <span>Custom analytics</span>
+                      </li>
+                      <li className="flex items-center">
+                        <Check className="h-5 w-5 text-yellow-400 mr-2" />
+                        <span>24/7 Dedicated support</span>
+                      </li>
+                      <li className="flex items-center">
+                        <Check className="h-5 w-5 text-yellow-400 mr-2" />
+                        <span>API access</span>
+                      </li>
+                      <li className="flex items-center">
+                        <Check className="h-5 w-5 text-yellow-400 mr-2" />
+                        <span>Custom integrations</span>
+                      </li>
+                    </ul>
+                    <Button className="w-full bg-white/5 hover:bg-white/10">
+                      Contact Sales
+                    </Button>
+                  </div>
+                </motion.div>
+              </motion.div>
+
+              {/* FAQ Section */}
+              <motion.div 
+                variants={fadeInUp}
+                className="mt-20 text-center"
+              >
+                <h3 className="text-2xl font-semibold mb-4">Frequently Asked Questions</h3>
+                <div className="grid md:grid-cols-2 gap-8 mt-8 text-left max-w-4xl mx-auto">
+                  {[
+                    {
+                      q: "How does the video limit work?",
+                      a: "Video limits reset monthly. Unused videos don't roll over to the next month."
+                    },
+                    {
+                      q: "Can I upgrade or downgrade my plan?",
+                      a: "Yes, you can change your plan at any time. Changes take effect on your next billing cycle."
+                    },
+                    {
+                      q: "Is there a free trial?",
+                      a: "Yes, all paid plans come with a 14-day free trial. No credit card required."
+                    },
+                    {
+                      q: "What payment methods do you accept?",
+                      a: "We accept all major credit cards, PayPal, and wire transfers for enterprise plans."
+                    }
+                  ].map((faq, i) => (
+                    <div key={i} className="bg-black/40 rounded-xl p-6 border border-white/5">
+                      <h4 className="font-semibold mb-2">{faq.q}</h4>
+                      <p className="text-gray-400 text-sm">{faq.a}</p>
+                    </div>
+                  ))}
+                </div>
+              </motion.div>
             </div>
           </motion.section>
 

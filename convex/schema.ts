@@ -54,5 +54,47 @@ export default defineSchema({
     engagement: v.number(),
     createdAt: v.number(),
     updatedAt: v.number(),
-  })
+  }),
+
+  videos: defineTable({
+    userId: v.string(),
+    youtubeUrl: v.string(),
+    youtubeId: v.string(),
+    title: v.string(),
+    description: v.optional(v.string()),
+    thumbnailUrl: v.optional(v.string()),
+    duration: v.optional(v.string()),
+    status: v.string(), // "pending", "processing", "completed", "failed"
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  }),
+
+  transcripts: defineTable({
+    videoId: v.id("videos"),
+    userId: v.string(),
+    content: v.string(),
+    language: v.string(),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  }),
+
+  generatedTitles: defineTable({
+    videoId: v.id("videos"),
+    userId: v.string(),
+    title: v.string(),
+    score: v.optional(v.number()),
+    isSelected: v.boolean(),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  }),
+
+  generatedImages: defineTable({
+    videoId: v.id("videos"),
+    userId: v.string(),
+    url: v.string(),
+    prompt: v.string(),
+    isSelected: v.boolean(),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  }),
 }); 
