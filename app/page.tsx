@@ -7,6 +7,8 @@ import { AnimatePresence, motion } from "framer-motion";
 import { clerkTheme } from "@/lib/clerk-theme";
 import { useState } from "react";
 import { AuthRedirect } from "@/components/auth-redirect";
+import Link from "next/link";
+import { routes } from "@/lib/navigation";
 
 // Animation variants
 const fadeInUp = {
@@ -166,15 +168,19 @@ export default function Home() {
                   predictive analytics to elevate your online presence.
                 </p>
 
-                <div className="flex items-center justify-center gap-6">
+                <div className="flex gap-4">
                   <SignUpButton mode="modal">
-                    <Button className="bg-yellow-400 text-black hover:bg-yellow-500 px-8">
+                    <Button size="lg">
                       Get Started
+                      <ChevronRight className="ml-2 h-4 w-4" />
                     </Button>
                   </SignUpButton>
-                  <Button variant="outline" className="border-gray-800 hover:bg-gray-800">
-                    Try for Free
-                  </Button>
+                  
+                  <Link href={routes.pricing}>
+                    <Button variant="outline" size="lg">
+                      View Pricing
+                    </Button>
+                  </Link>
                 </div>
               </motion.div>
 

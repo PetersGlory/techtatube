@@ -1,26 +1,19 @@
 "use client";
 
-import { useAuth, useUser } from "@clerk/nextjs";
+import { useUser } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
-import { useMutation } from "convex/react";
-import { api } from "@/convex/_generated/api";
+import { routes } from "@/lib/navigation";
 
 export function AuthRedirect() {
-  const { isSignedIn } = useAuth();
-  const { user } = useUser();
+  const { isSignedIn } = useUser();
   const router = useRouter();
-  const createUser = useMutation(api.users.createUser);
 
   useEffect(() => {
-    if (isSignedIn && user) {
-      createUser({ 
-        userId: user.id,
-        email: user.emailAddresses[0].emailAddress 
-      });
-      router.push("/dashboard");
+    if (isSignedIn) {
+      router.push(routes.dashboard);
     }
-  }, [isSignedIn, user, router, createUser]);
+  }, [isSignedIn, router]);
 
   return null;
 } 
