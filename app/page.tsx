@@ -2,7 +2,17 @@
 
 import { Button } from "@/components/ui/button";
 import { SignIn, SignInButton, SignUpButton } from "@clerk/nextjs";
-import { ChevronRight, Command, BarChart2, FileText, PieChart, CheckCircle, Menu, Check } from "lucide-react";
+import { 
+  ChevronRight, 
+  Command, 
+  BarChart2, 
+  FileText, 
+  Youtube,
+  Sparkles,
+  CheckCircle,
+  Menu,
+  Check
+} from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import { clerkTheme } from "@/lib/clerk-theme";
 import { useState } from "react";
@@ -36,6 +46,38 @@ const slideIn = {
   animate: { x: 0, opacity: 1 },
   transition: { duration: 0.5 }
 };
+
+const features = [
+  {
+    icon: <Youtube className="h-6 w-6" />,
+    title: "Video Processing",
+    description: "Upload YouTube videos and get instant transcripts",
+  },
+  {
+    icon: <Sparkles className="h-6 w-6" />,
+    title: "AI Analysis",
+    description: "Get AI-powered insights, summaries, and key points",
+  },
+  {
+    icon: <BarChart2 className="h-6 w-6" />,
+    title: "Analytics",
+    description: "Track performance and engagement metrics",
+  },
+  {
+    icon: <FileText className="h-6 w-6" />,
+    title: "Content Insights",
+    description: "Understand sentiment and content ratings",
+  },
+];
+
+const benefits = [
+  "Instant video transcription",
+  "AI-powered content analysis",
+  "Sentiment analysis",
+  "Content rating detection",
+  "Key points extraction",
+  "Tag suggestions",
+];
 
 export default function Home() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -192,35 +234,14 @@ export default function Home() {
                 viewport={{ once: true }}
                 className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mt-20"
               >
-                {[
-                  {
-                    title: "Content Management",
-                    description: "Create, organize, and publish content across multiple platforms",
-                    icon: FileText
-                  },
-                  {
-                    title: "Performance Tracking",
-                    description: "Monitor performance with real-time analytics",
-                    icon: BarChart2
-                  },
-                  {
-                    title: "Reporting & Analytics",
-                    description: "Comprehensive reports for content optimization",
-                    icon: PieChart
-                  },
-                  {
-                    title: "Task & Activity",
-                    description: "Integrated task management for content creators",
-                    icon: CheckCircle
-                  }
-                ].map((feature) => (
+                {features.map((feature, i) => (
                   <motion.div
                     key={feature.title}
                     variants={fadeInUp}
                     whileHover={{ scale: 1.02 }}
                     className="bg-black/40 rounded-2xl p-6 border border-white/5 backdrop-blur-sm"
                   >
-                    <feature.icon className="h-6 w-6 text-yellow-400 mb-4" />
+                    <div className="text-yellow-400 mb-4">{feature.icon}</div>
                     <h3 className="text-lg font-semibold mb-2">{feature.title}</h3>
                     <p className="text-gray-400 text-sm">{feature.description}</p>
                   </motion.div>

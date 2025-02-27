@@ -8,12 +8,17 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { VideoMetrics } from "@/components/video-metrics";
 import { VideoAnalysisList } from "@/components/video-analysis-list";
 import { Video } from "@/convex/types";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function AnalysisPage() {
-  const { user } = useUser();
+  const { user, isLoaded } = useUser();
   const videos = useQuery(api.videos.getUserVideos, { 
-    userId: user?.id ?? "" 
+    userId: user?.id ?? "skip"
   }) as Video[] | undefined;
+
+  if (!isLoaded) {
+    return <LoadingSkeleton />;
+  }
 
   return (
     <div className="container mx-auto py-10">
@@ -39,6 +44,18 @@ export default function AnalysisPage() {
             <VideoAnalysisList videos={videos ?? []} />
           </TabsContent>
         </Tabs>
+      </div>
+    </div>
+  );
+}
+
+function LoadingSkeleton() {
+  return (
+    <div className="container mx-auto py-10">
+      <div className="space-y-8">
+        <Skeleton className="h-8 w-64" />
+        <Skeleton className="h-32 w-full" />
+        <Skeleton className="h-64 w-full" />
       </div>
     </div>
   );

@@ -7,12 +7,17 @@ import { YoutubeForm } from "@/components/youtube-form";
 import { VideoList } from "@/components/video-list";
 import { Card } from "@/components/ui/card";
 import { Video } from "@/convex/types";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function VideosPage() {
-  const { user } = useUser();
+  const { user, isLoaded } = useUser();
   const videos = useQuery(api.videos.getUserVideos, {
-    userId: user?.id ?? "",
+    userId: user?.id ?? "skip",
   }) as Video[] | undefined;
+
+  if (!isLoaded) {
+    return <LoadingSkeleton />;
+  }
 
   return (
     <div className="container mx-auto py-10">
@@ -29,6 +34,18 @@ export default function VideosPage() {
         </Card>
 
         <VideoList videos={videos ?? []} />
+      </div>
+    </div>
+  );
+}
+
+function LoadingSkeleton() {
+  return (
+    <div className="container mx-auto py-10">
+      <div className="max-w-2xl mx-auto space-y-8">
+        <Skeleton className="h-8 w-64" />
+        <Skeleton className="h-32 w-full" />
+        <Skeleton className="h-64 w-full" />
       </div>
     </div>
   );
