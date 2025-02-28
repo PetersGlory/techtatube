@@ -33,11 +33,9 @@ export default function VideosPage() {
 
   const videos = useQuery(api.videos.getUserVideos, {
     userId: user?.id ?? "skip",
-  }) as Video[] | undefined;
+  });
 
-  if (!isLoaded) {
-    return <LoadingSkeleton />;
-  }
+  if (!isLoaded || !videos) return <LoadingSkeleton />;
 
   const filteredVideos = videos?.filter(video => {
     const matchesSearch = video.title?.toLowerCase().includes(searchTerm.toLowerCase()) ?? false;
@@ -56,9 +54,9 @@ export default function VideosPage() {
     <div className="container mx-auto py-10 space-y-8">
       {/* Header Section */}
       <div>
-        <h1 className="text-3xl font-bold mb-2">Video Processing</h1>
+        <h1 className="text-3xl font-bold mb-2">Video Analysis</h1>
         <p className="text-muted-foreground">
-          Upload YouTube videos to generate transcripts and AI analysis
+          Enter a YouTube URL to analyze the video content
         </p>
       </div>
 
@@ -124,7 +122,7 @@ export default function VideosPage() {
           </div>
         </div>
 
-        <VideoList videos={filteredVideos ?? []} />
+        <VideoList videos={filteredVideos as Video[]} />
       </Card>
     </div>
   );

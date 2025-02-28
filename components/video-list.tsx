@@ -4,7 +4,10 @@
 import { Video } from "@/convex/types";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { formatDistanceToNow } from "date-fns";
+import Link from "next/link";
+import { FileText, ExternalLink } from "lucide-react";
 import { VideoTranscript } from "@/components/video-transcript";
 
 interface VideoListProps {
@@ -49,6 +52,22 @@ export function VideoList({ videos }: VideoListProps) {
               <div className="flex items-center gap-2 mt-2 text-xs text-muted-foreground">
                 <span>Submitted {formatDistanceToNow(video.createdAt)} ago</span>
                 {video.duration && <span>• Duration: {video.duration}</span>}
+              </div>
+              <div className="flex items-center gap-4 mt-4">
+                <Link href={`/videos/${video._id}`}>
+                  <Button variant="default" size="sm" className="gap-2">
+                    <FileText className="h-4 w-4" />
+                    View Analysis
+                  </Button>
+                </Link>
+                {video.youtubeUrl && (
+                  <Link href={video.youtubeUrl} target="_blank">
+                    <Button variant="ghost" size="sm" className="gap-2">
+                      <ExternalLink className="h-4 w-4" />
+                      Watch on YouTube
+                    </Button>
+                  </Link>
+                )}
               </div>
             </div>
           </div>

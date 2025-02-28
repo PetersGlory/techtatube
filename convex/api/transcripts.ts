@@ -10,10 +10,11 @@ export const api = {
       language: v.string(),
     },
     handler: async (ctx, args) => {
+      const now = Date.now();
       return await ctx.db.insert("transcripts", {
         ...args,
-        createdAt: Date.now(),
-        updatedAt: Date.now(),
+        createdAt: now,
+        updatedAt: now,
       });
     },
   }),

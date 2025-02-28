@@ -4,7 +4,8 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
 
 export async function analyzeVideoContent(transcript: string) {
   try {
-    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+    // Change from gemini-pro to gemini-1.5-flash for the free version
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
     
     const prompt = `Analyze this video transcript and provide insights in the following JSON format:
     {
@@ -22,9 +23,21 @@ export async function analyzeVideoContent(transcript: string) {
     const response = await result.response;
     const text = response.text();
     
-    return JSON.parse(text);
+    try {
+      return JSON.parse(text);
+    } catch (parseError) {
+      console.error("JSON parsing error:", parseError);
+      // Return a simplified response if JSON parsing fails
+      return {
+        summary: "Failed to parse response",
+        keyPoints: ["Error processing transcript"],
+        sentiment: "neutral",
+        suggestedTags: ["error"],
+        contentRating: "unknown"
+      };
+    }
   } catch (error) {
     console.error("Gemini Analysis Error:", error);
     throw new Error("Failed to analyze video content");
   }
-} 
+}

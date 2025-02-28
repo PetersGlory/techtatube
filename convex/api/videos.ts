@@ -20,14 +20,14 @@ export const api = {
         throw new Error("Invalid YouTube URL");
       }
 
+      const now = Date.now();
       return await ctx.db.insert("videos", {
         userId: args.userId,
         youtubeUrl: args.youtubeUrl,
-        youtubeId,
-        title: "",
+        title: youtubeId || "",
         status: "pending",
-        createdAt: Date.now(),
-        updatedAt: Date.now(),
+        createdAt: now,
+        updatedAt: now,
       });
     },
   }),
@@ -42,8 +42,16 @@ export const api = {
         .collect();
 
       return videos.map(video => ({
-        ...video,
-        status: video.status as "pending" | "processing" | "completed" | "failed"
+        _id: video._id,
+        _creationTime: video._creationTime,
+        userId: video.userId,
+        youtubeUrl: video.youtubeUrl,
+        title: video.title,
+        description: video.description,
+        thumbnailUrl: video.thumbnailUrl,
+        status: video.status as "pending" | "processing" | "completed" | "failed",
+        createdAt: video.createdAt,
+        updatedAt: video.updatedAt,
       }));
     },
   }),
@@ -71,9 +79,10 @@ export const api = {
       status: v.string(),
     },
     handler: async (ctx, args) => {
+      const now = Date.now();
       await ctx.db.patch(args.videoId, {
         status: args.status,
-        updatedAt: Date.now(),
+        updatedAt: now,
       });
     },
   }),

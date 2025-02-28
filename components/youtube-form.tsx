@@ -1,126 +1,83 @@
 "use client";
 
 import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
-import { useMutation, useQuery } from "convex/react";
+import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
-import { useUser } from "@clerk/nextjs";
 import { Button } from "@/components/ui/button";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { useUser } from "@clerk/nextjs";
 import { showToast } from "@/lib/toast-utils";
-
-const formSchema = z.object({
-  youtubeUrl: z
-    .string()
-    .min(1, "YouTube URL is required")
-    .regex(
-      /^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be)\/.+/,
-      "Invalid YouTube URL"
-    ),
-});
+import { useRouter } from "next/navigation";
 
 export function YoutubeForm() {
   const { user } = useUser();
-  const [isLoading, setIsLoading] = useState(false);
   const createVideo = useMutation(api.videos.createVideo);
-  
-  // Get usage stats
-  const usage = useQuery(api.usage.getUsage, {
-    userId: user?.id ?? "skip",
-  });
+  const [url, setUrl] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter()
 
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      youtubeUrl: "",
-    },
-  });
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!url.trim() || isLoading) return;
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
-    if (!user) {
-      showToast.error("Authentication Required", "Please sign in to continue.");
-      return;
-    }
-
+    setIsLoading(true);
     try {
-      setIsLoading(true);
-      
-      // Check if user has reached their limit
-      if (usage && usage.current >= usage.limit) {
-        showToast.error(
-          "Usage Limit Reached", 
-          "Please upgrade your plan to process more videos."
-        );
+      const youtubeId = extractYoutubeId(url.trim());
+      if (!youtubeId) {
+        showToast.error("Invalid URL", "Please enter a valid YouTube URL");
         return;
       }
 
-      // Create video
-      await createVideo({
-        youtubeUrl: values.youtubeUrl,
-        userId: user.id,
+      const videoId = await createVideo({
+        userId: user!.id,
+        youtubeUrl: url.trim(),
       });
 
-      showToast.success("Success", "Video processing started");
-      form.reset();
+      showToast.loading("Processing", "Starting video analysis...");
 
+      const response = await fetch("/api/videos/transcript", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ videoId, youtubeId }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to process video");
+      }
+
+      showToast.success("Success", "Video analysis started");
+      setUrl("");
+      router.push(`/videos/${videoId}`);
     } catch (error) {
-      console.error("Error processing video:", error);
+      console.error("Error:", error);
       showToast.error(
-        "Processing Error",
-        "Failed to process video. Please try again."
+        "Error",
+        error instanceof Error ? error.message : "Failed to process video"
       );
     } finally {
       setIsLoading(false);
     }
-  }
+  };
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        <FormField
-          control={form.control}
-          name="youtubeUrl"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>YouTube URL</FormLabel>
-              <FormControl>
-                <Input 
-                  placeholder="https://youtube.com/watch?v=..." 
-                  {...field} 
-                  disabled={isLoading}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        
-        {usage && (
-          <p className="text-sm text-muted-foreground">
-            {usage.current} / {usage.limit} videos processed this month
-          </p>
-        )}
-
-        <Button type="submit" disabled={isLoading}>
-          {isLoading ? (
-            <>
-              <span className="animate-pulse">Processing...</span>
-            </>
-          ) : (
-            "Submit"
-          )}
-        </Button>
-      </form>
-    </Form>
+    <form onSubmit={handleSubmit} className="flex gap-2">
+      <Input
+        value={url}
+        onChange={(e) => setUrl(e.target.value)}
+        placeholder="Enter YouTube URL..."
+        className="flex-1"
+      />
+      <Button type="submit" disabled={isLoading}>
+        {isLoading ? "Processing..." : "Analyze"}
+      </Button>
+    </form>
   );
+}
+
+function extractYoutubeId(url: string) {
+  const regex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;
+  const match = url.match(regex);
+  return match ? match[1] : null;
 } 

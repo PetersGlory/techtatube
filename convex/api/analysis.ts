@@ -40,28 +40,17 @@ export const api = {
         summary: v.string(),
         keyPoints: v.array(v.string()),
         sentiment: v.string(),
-        suggestedTags: v.array(v.string()),
         contentRating: v.string(),
+        suggestedTags: v.array(v.string()),
       }),
     },
     handler: async (ctx, args) => {
-      const existing = await ctx.db
-        .query("analysis")
-        .filter((q) => q.eq(q.field("videoId"), args.videoId))
-        .first();
-
-      if (existing) {
-        return await ctx.db.patch(existing._id, {
-          ...args.analysis,
-          updatedAt: Date.now(),
-        });
-      }
-
+      const now = Date.now();
       return await ctx.db.insert("analysis", {
         videoId: args.videoId,
         ...args.analysis,
-        createdAt: Date.now(),
-        updatedAt: Date.now(),
+        createdAt: now,
+        updatedAt: now,
       });
     },
   }),

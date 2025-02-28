@@ -31,10 +31,9 @@ export const createVideo = mutation({
 
     // Create video record
     const videoId = await ctx.db.insert("videos", {
-      youtubeId,
       userId: args.userId,
       youtubeUrl: args.youtubeUrl,
-      title: "", // Empty title initially, will be updated with metadata
+      title: youtubeId || "", // Empty title initially, will be updated with metadata
       status: "processing",
       createdAt: Date.now(),
       updatedAt: Date.now(),
@@ -87,5 +86,15 @@ export const updateVideoStatus = mutation({
       status: args.status,
       updatedAt: Date.now(),
     });
+  },
+});
+
+export const getVideo = query({
+  args: { videoId: v.id("videos") },
+  handler: async (ctx, args) => {
+    return await ctx.db
+      .query("videos")
+      .filter((q) => q.eq(q.field("_id"), args.videoId))
+      .first();
   },
 }); 

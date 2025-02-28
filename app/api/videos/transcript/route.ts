@@ -1,16 +1,18 @@
 import { NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs";
 import { ConvexHttpClient } from "convex/browser";
 import { api } from "@/convex/_generated/api";
 import { getTranscript } from "@/lib/transcript";
 import { analyzeVideoContent } from "@/lib/gemini";
 import { showToast } from "@/lib/toast-utils";
+import { Id } from "@/convex/_generated/dataModel";
+import { auth } from "@clerk/nextjs/server";
 
 const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
 
 export const runtime = 'edge';
 
 export async function POST(req: Request) {
+  let videoId: Id<"videos"> | undefined;
   try {
     const { userId } = auth();
     if (!userId) {
@@ -26,13 +28,24 @@ export async function POST(req: Request) {
       return new NextResponse("Access Denied", { status: 403 });
     }
 
-    const { videoId, youtubeId } = await req.json();
+    const body = await req.json();
+    videoId = body.videoId;
+    const { youtubeId } = body;
+
     showToast.loading("Processing Transcript", "Extracting video transcript...");
 
     const content = await getTranscript(youtubeId);
+    if (!content) {
+      throw new Error("Failed to get transcript");
+    }
+
+    await convex.mutation(api.videos.updateVideoStatus, {
+      videoId: videoId as Id<"videos">,
+      status: "processing",
+    });
 
     await convex.mutation(api.transcripts.createTranscript, {
-      videoId,
+      videoId: videoId as Id<"videos">,
       userId,
       content,
       language: 'en',
@@ -40,10 +53,13 @@ export async function POST(req: Request) {
 
     // Analyze with Gemini
     const analysis = await analyzeVideoContent(content);
+    if (!analysis) {
+      throw new Error("Failed to analyze content");
+    }
     
     // Save analysis
     await convex.mutation(api.analysis.saveAnalysis, {
-      videoId,
+      videoId: videoId as Id<"videos">,
       analysis,
     });
 
@@ -52,7 +68,7 @@ export async function POST(req: Request) {
 
     // Update video status
     await convex.mutation(api.videos.updateVideoStatus, {
-      videoId,
+      videoId: videoId as Id<"videos">,
       status: "completed",
     });
 
@@ -61,17 +77,17 @@ export async function POST(req: Request) {
   } catch (error) {
     console.error("Error processing video:", error);
     
-    // Update video status to failed
-    const { videoId } = await req.json();
-    await convex.mutation(api.videos.updateVideoStatus, {
-      videoId,
-      status: "failed",
-    });
+    if (videoId) {
+      await convex.mutation(api.videos.updateVideoStatus, {
+        videoId: videoId as Id<"videos">,
+        status: "failed",
+      });
+    }
 
     showToast.error(
       "Transcript Error",
       "Failed to process video transcript. Please try again."
     );
-    return new NextResponse("Failed to fetch transcript", { status: 500 });
+    return new NextResponse("Failed to process video", { status: 500 });
   }
 } 
