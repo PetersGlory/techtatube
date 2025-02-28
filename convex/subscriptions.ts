@@ -26,7 +26,8 @@ export const getSubscription = query({
       .query("subscriptions")
       .filter((q) => q.eq(q.field("userId"), args.userId))
       .first();
-    return subscription;
+
+    return subscription || null; // Return null if no subscription found
   },
 });
 

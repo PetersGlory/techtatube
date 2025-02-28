@@ -6,7 +6,7 @@ import { api } from "@/convex/_generated/api";
 import { useUser } from "@clerk/nextjs";
 // import { motion } from "framer-motion";
 import { ContentForm } from "@/components/content-form"
-import { BarChart, FileText, Users, ArrowUpRight, Search, Filter, Edit2, Trash2, Youtube, Sparkles, TrendingUp, Clock } from "lucide-react";
+import { BarChart, FileText, Users, ArrowUpRight, Search, Filter, Edit2, Trash2, Youtube, Sparkles, TrendingUp, Clock, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -34,6 +34,8 @@ import Link from "next/link";
 import { routes } from "@/lib/navigation";
 import { formatDistanceToNow } from "date-fns";
 import { Video } from "@/convex/types";
+import { Badge } from "@/components/ui/badge";
+import { YoutubeForm } from "@/components/youtube-form";
 
 export default function DashboardPage() {
   const { user, isLoaded } = useUser();
@@ -92,103 +94,136 @@ export default function DashboardPage() {
 
   // useAnalytics(); // Track user analytics
 
+  const stats = {
+    total: videos?.length ?? 0,
+    processing: videos?.filter(v => v.status === "processing").length ?? 0,
+    completed: videos?.filter(v => v.status === "completed").length ?? 0,
+    failed: videos?.filter(v => v.status === "failed").length ?? 0,
+  };
+
   return (
     <div className="space-y-8">
-      {/* Welcome Section */}
-      <div className="flex justify-between items-center">
+      <div className="flex justify-between items-start">
         <div>
-          <h1 className="text-3xl font-bold">Welcome back, {user?.firstName}</h1>
-          <p className="text-muted-foreground mt-1">
-            Here&#39;s what&lsquo;s happening with your videos
+          <h1 className="text-3xl font-bold mb-2">Dashboard</h1>
+          <p className="text-muted-foreground">
+            Upload and analyze your YouTube videos
           </p>
         </div>
-        <Link href={routes.videos}>
-          <Button>
-            <Youtube className="mr-2 h-4 w-4" />
-            Process New Video
-          </Button>
-        </Link>
+        
+        {usage && (
+          <Card className="p-4">
+            <div className="flex items-center gap-4">
+              <div className="text-sm text-muted-foreground">
+                Monthly Usage
+              </div>
+              <Badge variant="secondary">
+                {usage.current} / {usage.limit}
+              </Badge>
+            </div>
+          </Card>
+        )}
       </div>
 
-      {/* Stats Grid */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <StatsCard
           title="Total Videos"
-          value={videos?.length ?? 0}
-          icon={<Youtube className="h-4 w-4" />}
-          description="Total videos processed"
-        />
-        <StatsCard
-          title="Completed"
-          value={completedVideos.length}
-          icon={<Sparkles className="h-4 w-4" />}
-          description="Successfully analyzed"
+          value={stats.total}
+          icon={<Youtube className="w-4 h-4" />}
         />
         <StatsCard
           title="Processing"
-          value={processingVideos.length}
-          icon={<Clock className="h-4 w-4" />}
-          description="Currently in progress"
+          value={stats.processing}
+          icon={<Clock className="w-4 h-4" />}
         />
         <StatsCard
-          title="Usage"
-          value={`${usage?.current ?? 0}/${usage?.limit ?? 0}`}
-          icon={<TrendingUp className="h-4 w-4" />}
-          description="Monthly video quota"
+          title="Completed"
+          value={stats.completed}
+          icon={<TrendingUp className="w-4 h-4" />}
+        />
+        <StatsCard
+          title="Failed"
+          value={stats.failed}
+          icon={<ExternalLink className="w-4 h-4" />}
         />
       </div>
 
-      {/* Recent Videos */}
       <Card className="p-6">
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-lg font-semibold">Recent Videos</h2>
-          <Link href={routes.videos}>
-            <Button variant="ghost" size="sm">
-              View All
-            </Button>
-          </Link>
+        <div className="mb-6">
+          <h2 className="text-xl font-semibold mb-2">Upload New Video</h2>
+          <p className="text-sm text-muted-foreground">
+            Enter a YouTube URL to start analyzing
+          </p>
+        </div>
+        <YoutubeForm />
+      </Card>
+
+      <div className="space-y-4">
+        <div className="flex justify-between items-center">
+          <h2 className="text-xl font-semibold">Recent Videos</h2>
+          <div className="flex items-center gap-2">
+            <Search className="w-4 h-4 text-muted-foreground" />
+            <Input
+              placeholder="Search videos..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-64"
+            />
+          </div>
         </div>
 
-        <div className="space-y-4">
-          {recentVideos.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground">
-              <FileText className="h-8 w-8 mx-auto mb-2 opacity-50" />
-              <p>No videos processed yet</p>
-              <Link href={routes.videos} className="text-sm text-primary hover:underline">
-                Process your first video
-              </Link>
-            </div>
-          ) : (
-            recentVideos.map((video) => (
-              <div 
-                key={video._id} 
-                className="flex items-center gap-4 p-4 rounded-lg bg-muted/50 hover:bg-muted transition-colors"
-              >
+        <div className="grid gap-4">
+          {recentVideos.map((video) => (
+            <Card key={video._id} className="p-4">
+              <div className="flex items-start gap-4">
                 {video.thumbnailUrl && (
-                  <img 
-                    src={video.thumbnailUrl} 
+                  <img
+                    src={video.thumbnailUrl}
                     alt={video.title}
-                    className="w-24 h-16 object-cover rounded"
+                    className="w-40 h-24 object-cover rounded-md"
                   />
                 )}
-                <div className="flex-1 min-w-0">
-                  <h3 className="font-medium truncate">{video.title}</h3>
-                  <p className="text-sm text-muted-foreground">
-                    Processed {formatDistanceToNow(video.createdAt)} ago
-                  </p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Link href={`/videos/${video._id}`}>
-                    <Button variant="ghost" size="sm">
-                      View Analysis
-                    </Button>
-                  </Link>
+                <div className="flex-1">
+                  <div className="flex items-center justify-between mb-2">
+                    <div>
+                      <h3 className="font-semibold">{video.title || "Untitled"}</h3>
+                      <p className="text-sm text-muted-foreground">
+                        Processed {formatDistanceToNow(video.createdAt)} ago
+                      </p>
+                    </div>
+                    <Badge variant={
+                      video.status === "completed" ? "success" :
+                      video.status === "failed" ? "destructive" :
+                      "secondary"
+                    }>
+                      {video.status}
+                    </Badge>
+                  </div>
+
+                  <div className="flex items-center gap-4 mt-4">
+                    {video.status === "completed" && (
+                      <Link href={`/videos/${video._id}`}>
+                        <Button variant="default" size="sm" className="gap-2">
+                          <FileText className="w-4 h-4" />
+                          View Analysis
+                        </Button>
+                      </Link>
+                    )}
+                    {video.youtubeUrl && (
+                      <Link href={video.youtubeUrl} target="_blank">
+                        <Button variant="ghost" size="sm" className="gap-2">
+                          <Youtube className="w-4 h-4" />
+                          Watch on YouTube
+                        </Button>
+                      </Link>
+                    )}
+                  </div>
                 </div>
               </div>
-            ))
-          )}
+            </Card>
+          ))}
         </div>
-      </Card>
+      </div>
 
       {/* Stats Overview */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -369,24 +404,21 @@ function StatsCard({
   title, 
   value, 
   icon, 
-  description 
 }: { 
   title: string;
-  value: number | string;
+  value: number;
   icon: React.ReactNode;
-  description: string;
 }) {
   return (
     <Card className="p-6">
-      <div className="flex items-center gap-2">
-        <div className="p-2 bg-primary/10 rounded-lg text-primary">
+      <div className="flex items-center justify-between">
+        <div>
+          <p className="text-sm font-medium text-muted-foreground">{title}</p>
+          <p className="text-2xl font-bold">{value}</p>
+        </div>
+        <div className="p-2 bg-primary/10 rounded-full">
           {icon}
         </div>
-        <span className="text-sm font-medium">{title}</span>
-      </div>
-      <div className="mt-4">
-        <div className="text-2xl font-bold">{value}</div>
-        <p className="text-sm text-muted-foreground">{description}</p>
       </div>
     </Card>
   );
@@ -395,34 +427,55 @@ function StatsCard({
 function LoadingSkeleton() {
   return (
     <div className="space-y-8">
-      <div className="flex justify-between items-center">
-        <div>
-          <Skeleton className="h-8 w-64" />
-          <Skeleton className="h-4 w-48 mt-1" />
-        </div>
-        <Skeleton className="h-10 w-32" />
+      <div>
+        <Skeleton className="h-8 w-64 mb-2" />
+        <Skeleton className="h-4 w-96" />
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         {Array(4).fill(0).map((_, i) => (
           <Card key={i} className="p-6">
-            <Skeleton className="h-8 w-24 mb-4" />
-            <Skeleton className="h-6 w-16" />
+            <div className="flex items-center justify-between">
+              <div className="space-y-2">
+                <Skeleton className="h-4 w-24" />
+                <Skeleton className="h-6 w-12" />
+              </div>
+              <Skeleton className="h-10 w-10 rounded-full" />
+            </div>
           </Card>
         ))}
       </div>
 
       <Card className="p-6">
-        <div className="flex justify-between items-center mb-6">
-          <Skeleton className="h-6 w-32" />
-          <Skeleton className="h-8 w-20" />
+        <Skeleton className="h-6 w-48 mb-2" />
+        <Skeleton className="h-4 w-96 mb-6" />
+        <Skeleton className="h-10 w-full" />
+      </Card>
+
+      <div className="space-y-4">
+        <div className="flex justify-between items-center">
+          <Skeleton className="h-6 w-48" />
+          <Skeleton className="h-10 w-64" />
         </div>
-        <div className="space-y-4">
+
+        <div className="grid gap-4">
           {Array(3).fill(0).map((_, i) => (
-            <Skeleton key={i} className="h-20 w-full" />
+            <Card key={i} className="p-4">
+              <div className="flex gap-4">
+                <Skeleton className="w-40 h-24" />
+                <div className="flex-1">
+                  <Skeleton className="h-6 w-64 mb-2" />
+                  <Skeleton className="h-4 w-32 mb-4" />
+                  <div className="flex gap-2">
+                    <Skeleton className="h-9 w-32" />
+                    <Skeleton className="h-9 w-32" />
+                  </div>
+                </div>
+              </div>
+            </Card>
           ))}
         </div>
-      </Card>
+      </div>
     </div>
   );
 }
