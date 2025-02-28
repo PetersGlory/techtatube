@@ -2,7 +2,7 @@ export default {
   providers: [
     {
       name: "clerk",
-      domain: process.env.CLERK_DOMAIN || "https://your-app.clerk.accounts.dev",
+      domain: process.env.CLERK_DOMAIN || "https://heroic-ghost-42.clerk.accounts.dev",
       applicationID: process.env.CLERK_APPLICATION_ID,
     },
   ],

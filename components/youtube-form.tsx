@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { useMutation } from "convex/react";
+import { useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { useUser } from "@clerk/nextjs";
 import { Button } from "@/components/ui/button";
@@ -17,24 +17,27 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { useToast } from "@/components/ui/use-toast";
 import { showToast } from "@/lib/toast-utils";
-import { useEntitlements } from "@/hooks/use-entitlements";
-import { EntitlementsResponse } from "@/convex/types";
 
 const formSchema = z.object({
   youtubeUrl: z
     .string()
-    .url("Please enter a valid URL")
-    .includes("youtube.com", { message: "Please enter a valid YouTube URL" }),
+    .min(1, "YouTube URL is required")
+    .regex(
+      /^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be)\/.+/,
+      "Invalid YouTube URL"
+    ),
 });
 
 export function YoutubeForm() {
   const { user } = useUser();
-  const { toast } = useToast();
-  const createVideo = useMutation(api.videos.createVideo);
   const [isLoading, setIsLoading] = useState(false);
-  const { hasFeatureAccess, entitlements } = useEntitlements();
+  const createVideo = useMutation(api.videos.createVideo);
+  
+  // Get usage stats
+  const usage = useQuery(api.usage.getUsage, {
+    userId: user?.id ?? "skip",
+  });
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -49,42 +52,32 @@ export function YoutubeForm() {
       return;
     }
 
-    setIsLoading(true);
-    showToast.loading("Processing Video", "Submitting video for processing...");
-
     try {
-      const videoId = await createVideo({
+      setIsLoading(true);
+      
+      // Check if user has reached their limit
+      if (usage && usage.current >= usage.limit) {
+        showToast.error(
+          "Usage Limit Reached", 
+          "Please upgrade your plan to process more videos."
+        );
+        return;
+      }
+
+      // Create video
+      await createVideo({
         youtubeUrl: values.youtubeUrl,
         userId: user.id,
       });
 
-      // Fetch metadata
-      await fetch("/api/videos/metadata", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ videoId }),
-      });
-
-      // Extract YouTube ID from URL
-      const youtubeId = values.youtubeUrl.match(/(?:v=|\/)([\w-]{11})(?:\?|$|&)/)?.[1];
-      
-      // Fetch transcript
-      await fetch("/api/videos/transcript", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ videoId, youtubeId }),
-      });
-
-      showToast.success(
-        "Video Submitted",
-        "Your video has been successfully submitted for processing."
-      );
-      
+      showToast.success("Success", "Video processing started");
       form.reset();
+
     } catch (error) {
+      console.error("Error processing video:", error);
       showToast.error(
-        "Submission Failed",
-        error instanceof Error ? error.message : "Failed to submit video"
+        "Processing Error",
+        "Failed to process video. Please try again."
       );
     } finally {
       setIsLoading(false);
@@ -93,7 +86,7 @@ export function YoutubeForm() {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
         <FormField
           control={form.control}
           name="youtubeUrl"
@@ -101,19 +94,31 @@ export function YoutubeForm() {
             <FormItem>
               <FormLabel>YouTube URL</FormLabel>
               <FormControl>
-                <Input placeholder="https://youtube.com/watch?v=..." {...field} />
+                <Input 
+                  placeholder="https://youtube.com/watch?v=..." 
+                  {...field} 
+                  disabled={isLoading}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
-        {entitlements && (
+        
+        {usage && (
           <p className="text-sm text-muted-foreground">
-            {entitlements.current} / {entitlements.limit} videos processed this month
+            {usage.current} / {usage.limit} videos processed this month
           </p>
         )}
+
         <Button type="submit" disabled={isLoading}>
-          {isLoading ? "Processing..." : "Submit"}
+          {isLoading ? (
+            <>
+              <span className="animate-pulse">Processing...</span>
+            </>
+          ) : (
+            "Submit"
+          )}
         </Button>
       </form>
     </Form>

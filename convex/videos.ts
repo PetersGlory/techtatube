@@ -20,15 +20,32 @@ export const createVideo = mutation({
       throw new Error("Invalid YouTube URL");
     }
 
-    return await ctx.db.insert("videos", {
+    const user = await ctx.db
+      .query("users")
+      .filter((q) => q.eq(q.field("userId"), args.userId))
+      .first();
+
+    if (!user) {
+      throw new Error("User not found");
+    }
+
+    // Create video record
+    const videoId = await ctx.db.insert("videos", {
+      youtubeId,
       userId: args.userId,
       youtubeUrl: args.youtubeUrl,
-      youtubeId,
-      title: "", // Will be updated after fetching metadata
-      status: "pending",
+      title: "", // Empty title initially, will be updated with metadata
+      status: "processing",
       createdAt: Date.now(),
       updatedAt: Date.now(),
     });
+
+    // Now use the user._id for the patch
+    await ctx.db.patch(user._id, {
+      usageCount: (user.usageCount || 0) + 1,
+    });
+
+    return videoId;
   },
 });
 

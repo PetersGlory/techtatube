@@ -15,7 +15,7 @@ const redis = new Redis({
 })
 
 const ratelimit = new Ratelimit({
-  redis: redis,
+  redis,
   limiter: Ratelimit.slidingWindow(10, "1 m"),
 })
 
@@ -28,14 +28,15 @@ const generateSchema = z.object({
 
 export async function POST(req: Request) {
   try {
+    const ip = req.headers.get("x-forwarded-for") ?? "127.0.0.1"
+    const { success } = await ratelimit.limit(ip)
+    if (!success) {
+      return new NextResponse("Too Many Requests", { status: 429 })
+    }
+
     const { userId } = auth()
     if (!userId) {
       return new NextResponse("Unauthorized", { status: 401 })
-    }
-
-    const { success } = await ratelimit.limit(userId)
-    if (!success) {
-      return new NextResponse("Rate limit exceeded", { status: 429 })
     }
 
     const json = await req.json()
@@ -82,8 +83,8 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ content: generatedContent })
   } catch (error) {
-    console.error("Error:", error)
-    return new NextResponse("Internal Error", { status: 500 })
+    console.error("Generate error:", error)
+    return new NextResponse("Internal Server Error", { status: 500 })
   }
 }
 
