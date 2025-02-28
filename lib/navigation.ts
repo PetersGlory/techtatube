@@ -3,7 +3,7 @@ export const routes = {
   dashboard: "/dashboard",
   videos: "/videos",
   analysis: "/analysis",
-  pricing: "/pricing",
+  pricing: "/subscription",
   auth: {
     signIn: "/sign-in",
     signUp: "/sign-up",

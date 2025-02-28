@@ -23,7 +23,7 @@ export function MainNav() {
     },
     {
       href: routes.pricing,
-      label: "Pricing",
+      label: "Subscription",
       requiresAuth: false,
     },
   ];
