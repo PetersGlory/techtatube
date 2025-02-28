@@ -16,9 +16,20 @@ export const api = {
     args: { userId: v.string() },
     handler: async (ctx, args) => {
       if (args.userId === "skip") return [];
-      return await ctx.db
+      
+      // Get all analyses and join with videos to filter by userId
+      const analyses = await ctx.db
         .query("analysis")
         .collect();
+
+      const videos = await ctx.db
+        .query("videos")
+        .filter((q) => q.eq(q.field("userId"), args.userId))
+        .collect();
+
+      const videoIds = new Set(videos.map(v => v._id));
+      
+      return analyses.filter(analysis => videoIds.has(analysis.videoId));
     },
   }),
 

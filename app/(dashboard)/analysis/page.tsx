@@ -29,9 +29,9 @@ export default function AnalysisPage() {
     userId: user?.id ?? "skip"
   }) as Video[] | undefined;
 
-  const analyses = useQuery(api.analysis.getVideoAnalyses, { 
-    userId: user?.id ?? "skip" 
-  });
+  // const analyses = useQuery(api.analysis.getAnalysis, { 
+  //   userId: user?.id ?? "skip" 
+  // });
 
   if (!isLoaded) {
     return <LoadingSkeleton />;
@@ -40,12 +40,12 @@ export default function AnalysisPage() {
   const filteredVideos = videos?.filter(video => 
     video.title?.toLowerCase().includes(searchTerm.toLowerCase()) ?? false
   );
-  const stats = {
-    totalAnalyses: analyses?.length ?? 0,
-    avgSentiment: "Positive", // You can calculate this from your analyses
-    keyPointsGenerated: analyses?.reduce((acc: number, a: { keyPoints?: any[] }) => acc + (a.keyPoints?.length ?? 0), 0) ?? 0,
-    tagsGenerated: analyses?.reduce((acc: number, a: { suggestedTags?: any[] }) => acc + (a.suggestedTags?.length ?? 0), 0) ?? 0,
-  };
+  // const stats = {
+  //   totalAnalyses: analyses?.length ?? 0,
+  //   avgSentiment: "Positive", // You can calculate this from your analyses
+  //   keyPointsGenerated: analyses?.reduce((acc: number, a: { keyPoints?: any[] }) => acc + (a.keyPoints?.length ?? 0), 0) ?? 0,
+  //   tagsGenerated: analyses?.reduce((acc: number, a: { suggestedTags?: any[] }) => acc + (a.suggestedTags?.length ?? 0), 0) ?? 0,
+  // };
 
   return (
     <div className="container mx-auto py-10 space-y-8">
@@ -58,7 +58,7 @@ export default function AnalysisPage() {
       </div>
 
       {/* Stats Overview */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      {/* <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatsCard
           title="Total Analyses"
           value={stats.totalAnalyses}
@@ -83,7 +83,7 @@ export default function AnalysisPage() {
           icon={<Tag className="h-4 w-4" />}
           className="bg-green-500/10 text-green-500"
         />
-      </div>
+      </div> */}
 
       {/* Main Content */}
       <Card className="p-6">
