@@ -38,6 +38,7 @@ export default function VideosPage() {
   if (!isLoaded) {
     return <LoadingSkeleton />;
   }
+
   const filteredVideos = videos?.filter(video => {
     const matchesSearch = video.title?.toLowerCase().includes(searchTerm.toLowerCase()) ?? false;
     const matchesStatus = statusFilter === "all" || video.status === statusFilter;

@@ -49,16 +49,6 @@ export function YoutubeForm() {
       return;
     }
 
-    // Check if user has access to video processing
-    const hasAccess = await hasFeatureAccess("video_processing");
-    if (!hasAccess) {
-      showToast.error(
-        "Feature Unavailable", 
-        "Please upgrade your plan to process more videos."
-      );
-      return;
-    }
-
     setIsLoading(true);
     showToast.loading("Processing Video", "Submitting video for processing...");
 
