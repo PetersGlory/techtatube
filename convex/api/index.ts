@@ -3,6 +3,7 @@ import { api as transcriptsApi } from "./transcripts";
 import { api as entitlementsApi } from "./entitlements";
 import { api as usageApi } from "./usage";
 import { api as analysisApi } from "./analysis";
+import { api as generationJobsApi } from "./generationJobs";
 
 export const api = {
   videos: videosApi,
@@ -10,4 +11,5 @@ export const api = {
   entitlements: entitlementsApi,
   usage: usageApi,
   analysis: analysisApi,
+  generationJobs: generationJobsApi,
 };

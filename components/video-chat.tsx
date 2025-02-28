@@ -14,9 +14,11 @@ interface Message {
 
 interface VideoChatProps {
   videoId: Id<"videos">;
+  transcript?: string;
+  analysis?: any; // Type this properly based on your analysis schema
 }
 
-export function VideoChat({ videoId }: VideoChatProps) {
+export function VideoChat({ videoId, transcript, analysis }: VideoChatProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -36,7 +38,11 @@ export function VideoChat({ videoId }: VideoChatProps) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ 
           message: userMessage, 
-          videoId: videoId 
+          videoId,
+          context: {
+            transcript,
+            analysis
+          }
         }),
       });
 
@@ -81,7 +87,7 @@ export function VideoChat({ videoId }: VideoChatProps) {
         </div>
       </ScrollArea>
 
-      <form onSubmit={handleSubmit} className="p-4 border-t">
+      <form onSubmit={handleSubmit} className="p-4 border-t bg-background">
         <div className="flex gap-2">
           <Textarea
             value={input}

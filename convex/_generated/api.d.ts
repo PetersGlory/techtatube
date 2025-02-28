@@ -16,6 +16,7 @@ import type {
 import type * as analysis from "../analysis.js";
 import type * as api_analysis from "../api/analysis.js";
 import type * as api_entitlements from "../api/entitlements.js";
+import type * as api_generationJobs from "../api/generationJobs.js";
 import type * as api_index from "../api/index.js";
 import type * as api_transcripts from "../api/transcripts.js";
 import type * as api_usage from "../api/usage.js";
@@ -43,6 +44,7 @@ declare const fullApi: ApiFromModules<{
   analysis: typeof analysis;
   "api/analysis": typeof api_analysis;
   "api/entitlements": typeof api_entitlements;
+  "api/generationJobs": typeof api_generationJobs;
   "api/index": typeof api_index;
   "api/transcripts": typeof api_transcripts;
   "api/usage": typeof api_usage;
