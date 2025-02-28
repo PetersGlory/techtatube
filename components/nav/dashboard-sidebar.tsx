@@ -11,7 +11,8 @@ import {
   Settings,
   Video,
   LineChart,
-  CreditCard 
+  CreditCard, 
+  Home
 } from "lucide-react";
 import { routes } from "@/lib/navigation";
 import { useUser } from "@clerk/nextjs";
@@ -21,6 +22,12 @@ export const DashboardSidebar = () => {
   const { user } = useUser();
 
   const sidebarItems = [
+    {
+      title: "Home",
+      icon: <Home className="w-4 h-4" />,
+      href: routes.dashboard,
+      requiresAuth: true,
+    },
     {
       title: "Videos",
       icon: <Video className="w-4 h-4" />,
