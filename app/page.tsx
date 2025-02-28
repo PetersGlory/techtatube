@@ -184,7 +184,7 @@ export default function Home() {
                   <Link href={routes.pricing}>
                     <Button size="lg" variant="outline" className="border-white/20 hover:bg-white/10">
                       View Pricing
-                    </Button>
+                  </Button>
                   </Link>
                 </motion.div>
               </motion.div>
@@ -207,11 +207,11 @@ export default function Home() {
             </motion.div>
           </motion.section>
 
-          {/* Feature Cards */}
+              {/* Feature Cards */}
           <motion.section
-            initial="initial"
-            whileInView="animate"
-            viewport={{ once: true }}
+                initial="initial"
+                whileInView="animate"
+                viewport={{ once: true }}
             className="py-24 relative bg-black/30"
           >
             <div className="container mx-auto px-4">
@@ -288,7 +288,7 @@ export default function Home() {
                         {feature.icon}
                       </div>
                       
-                      <h3 className="text-lg font-semibold mb-2">{feature.title}</h3>
+                    <h3 className="text-lg font-semibold mb-2">{feature.title}</h3>
                       <p className="text-gray-400 text-sm leading-relaxed">
                         {feature.description}
                       </p>
