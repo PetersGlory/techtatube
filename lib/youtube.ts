@@ -4,14 +4,15 @@ import { google } from 'googleapis';
 
 const YOUTUBE_API_KEY = process.env.YOUTUBE_API_KEY;
 
-const youtube = new google.youtube({
+// Fix: Remove the 'new' keyword
+const youtube = google.youtube({
   version: 'v3',
   auth: YOUTUBE_API_KEY,
-});
+}) as any;
 
 export interface VideoDetails {
   title: string;
-  views: string; // Changed from string to number for better type accuracy
+  views: string;
   thumbnail: string;
   duration: string;
   description: string;
@@ -19,7 +20,6 @@ export interface VideoDetails {
   comments: string;
   likes: string;
   publishedAt: string;
-
 }
 
 export interface ChannelDetails {
@@ -65,7 +65,7 @@ export async function getVideoTranscript(videoId: string, language = 'en', userI
 
     // Find the caption track in the requested language
     const captionTrack = captionResponse.data.items?.find(
-      (      item: { snippet: { language: string; }; }) => item.snippet?.language === language
+      (item: { snippet: { language: string; }; }) => item.snippet?.language === language
     );
 
     if (!captionTrack || !captionTrack.id) {
@@ -94,7 +94,6 @@ export async function getVideoTranscript(videoId: string, language = 'en', userI
 } 
 
 export async function getVideoDetails(videoId: string) {
-
   try {   
     const response = await youtube.videos.list({
       part: ['snippet', 'contentDetails', 'statistics'],
@@ -112,7 +111,6 @@ export async function getVideoDetails(videoId: string) {
     });
     const channelDetails = channelResponse.data.items?.[0];
     console.log("channel-Info: ", channelResponse.data);
-
 
     const videoInfo: VideoDetails = {
       title: videoDetails?.snippet?.title || '',
@@ -133,10 +131,8 @@ export async function getVideoDetails(videoId: string) {
       likes: videoDetails?.statistics?.likeCount || '',
     }
     return videoInfo;
-} catch (error) {
-  console.error("Error fetching video details:", error);
-  return null;
+  } catch (error) {
+    console.error("Error fetching video details:", error);
+    return null;
+  }
 }
-}
-
-
