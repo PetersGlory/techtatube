@@ -10,7 +10,7 @@ export const api = {
     },
     handler: async (ctx, args) => {
       await ctx.db.patch(args.userId as Id<"users">, {
-        plan: args.plan || "",
+        plan: args.plan || "free",
       });
     },
   }),
