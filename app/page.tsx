@@ -106,16 +106,7 @@ export default function Home() {
 
               {/* Desktop Auth Buttons */}
               <div className="hidden md:flex items-center gap-4">
-                {user ? (
-                  <Link href={routes.dashboard}>
-                    <Button
-                      variant="ghost"
-                      className="text-gray-400 bg-white/5 hover:text-white"
-                    >
-                     <UserButton /> Dashboard
-                    </Button>
-                  </Link>
-                ) : (
+                {!user ? (
                   <SignInButton mode="modal">
                     <Button
                       variant="ghost"
@@ -124,6 +115,15 @@ export default function Home() {
                       Sign In
                     </Button>
                   </SignInButton>
+                ) : (
+                  <Link href={routes.dashboard}>
+                    <Button
+                      variant="ghost"
+                      className="text-gray-400 bg-white/5 hover:text-white"
+                    >
+                     <UserButton /> Dashboard
+                    </Button>
+                  </Link>
                 )}
                
                {!user && (

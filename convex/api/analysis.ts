@@ -36,6 +36,7 @@ export const api = {
   saveAnalysis: mutation({
     args: {
       videoId: v.id("videos"),
+      userId: v.id("users"),
       analysis: v.object({
         summary: v.string(),
         keyPoints: v.array(v.string()),

@@ -25,8 +25,12 @@ export function YoutubeForm() {
       const youtubeId = extractYoutubeId(url.trim());
       if (!youtubeId) {
         showToast.error("Invalid URL", "Please enter a valid YouTube URL");
+        setIsLoading(false);
         return;
       }
+
+      // Log the extracted ID for debugging
+      console.log("Extracted YouTube ID:", youtubeId);
 
       const videoId = await createVideo({
         userId: user!.id,
@@ -35,10 +39,16 @@ export function YoutubeForm() {
 
       showToast.loading("Processing", "Starting video analysis...");
 
+      // Ensure we're sending the correct format
       const response = await fetch("/api/videos/transcript", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ videoId, youtubeId, userId: user!.id }),
+        body: JSON.stringify({ 
+          videoId, 
+          youtubeId, 
+          userId: user!.id,
+          youtubeUrl: url.trim() // Add the full URL as well
+        }),
       });
 
       const data = await response.json();
@@ -76,8 +86,34 @@ export function YoutubeForm() {
   );
 }
 
+// Improved YouTube ID extraction function
 function extractYoutubeId(url: string) {
-  const regex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;
-  const match = url.match(regex);
-  return match ? match[1] : null;
+  // Handle various YouTube URL formats
+  try {
+    // Standard YouTube URL format
+    const regExp = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#&?]*).*/;
+    const match = url.match(regExp);
+    
+    if (match && match[7].length === 11) {
+      return match[7];
+    }
+    
+    // Handle youtu.be format
+    const shortUrlRegExp = /^(https?:\/\/)?youtu\.be\/([a-zA-Z0-9_-]{11})$/;
+    const shortMatch = url.match(shortUrlRegExp);
+    
+    if (shortMatch) {
+      return shortMatch[2];
+    }
+    
+    // Handle direct ID input (if user just pastes the ID)
+    if (url.length === 11 && /^[a-zA-Z0-9_-]{11}$/.test(url)) {
+      return url;
+    }
+    
+    return null;
+  } catch (error) {
+    console.error("Error extracting YouTube ID:", error);
+    return null;
+  }
 } 

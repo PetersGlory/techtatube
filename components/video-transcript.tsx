@@ -10,6 +10,12 @@ interface VideoTranscriptProps {
   videoId: Id<"videos">;
 }
 
+function decodeHtmlEntities(str: string) {
+  const textarea = document.createElement('textarea');
+  textarea.innerHTML = str;
+  return textarea.value;
+}
+
 export function VideoTranscript({ videoId }: VideoTranscriptProps) {
   const transcript = useQuery(api.transcripts.getVideoTranscript, { 
     videoId 
@@ -17,18 +23,23 @@ export function VideoTranscript({ videoId }: VideoTranscriptProps) {
 
   if (!transcript) {
     return (
-      <Card className="p-4">
-        <p className="text-muted-foreground">No transcript available</p>
+      <Card className="p-4 text-center text-muted-foreground">
+        No transcript available
       </Card>
     );
   }
 
+  const content = decodeHtmlEntities(transcript.content);
+  console.log("Decoded Content:", content);
+
   return (
-    <Card className="p-4">
-      <h3 className="font-semibold mb-2">Transcript</h3>
-      <ScrollArea className="h-[200px]">
-        <p className="text-sm whitespace-pre-wrap">{transcript.content}</p>
+    <Card className="flex flex-col h-full">
+      <div className="px-4 py-2 border-b font-medium">
+        Transcript
+      </div>
+      <ScrollArea className="w-full p-4 h-[300px]">
+        {content}
       </ScrollArea>
     </Card>
   );
-} 
+}

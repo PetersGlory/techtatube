@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 
 "use client";
 
@@ -239,7 +240,7 @@ export default function VideoPage() {
             Chat with AI about the video content
           </p>
         </div>
-        {video.status === "completed" ? (
+        {video.status === "completed" || video.status === "processing" ? (
           <VideoChat 
             videoId={video._id} 
             transcript={transcript?.content}
