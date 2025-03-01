@@ -22,9 +22,9 @@ export const api = {
 
       const now = Date.now();
       return await ctx.db.insert("videos", {
-        userId: args.userId,
+        userId: args.userId as Id<"users">,
         youtubeUrl: args.youtubeUrl,
-        title: youtubeId || "",
+        youtubeId: youtubeId || "",
         status: "pending",
         createdAt: now,
         updatedAt: now,

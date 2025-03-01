@@ -10,6 +10,7 @@ export default defineSchema({
     usageLimit: v.number(),
     usageCount: v.number(),
     teamId: v.optional(v.string()),
+    plan: v.optional(v.string()),
   }),
 
   teams: defineTable({
@@ -59,12 +60,13 @@ export default defineSchema({
   videos: defineTable({
     userId: v.string(),
     youtubeUrl: v.string(),
+    youtubeId: v.string(),
     title: v.optional(v.string()),
     description: v.optional(v.string()),
     thumbnailUrl: v.optional(v.string()),
     status: v.string(),
-    createdAt: v.number(),
-    updatedAt: v.number(),
+    createdAt: v.float64(),
+    updatedAt: v.float64()
   }),
 
   transcripts: defineTable({
@@ -107,11 +109,11 @@ export default defineSchema({
   }),
 
   generationJobs: defineTable({
-    userId: v.string(),
+    userId: v.id("users"),
     videoId: v.id("videos"),
     type: v.string(), // "title", "image", "transcript"
     status: v.string(), // "pending", "processing", "completed", "failed"
-    result: v.optional(v.string()),
+    result: v.optional(v.any()),
     metadata: v.optional(v.any()),
     createdAt: v.number(),
     updatedAt: v.number(),

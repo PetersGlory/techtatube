@@ -15,6 +15,7 @@ interface User {
   usageLimit: number;
   usageCount: number;
   teamId?: string;
+  plan?: string;
 }
 
 export const getUser = query({
@@ -32,6 +33,7 @@ export const createUser = mutation({
   args: {
     userId: v.string(),
     email: v.string(),
+    plan: v.string(),
   },
   handler: async (ctx, args) => {
     return await ctx.db.insert("users", {

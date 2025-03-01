@@ -31,9 +31,9 @@ export const createVideo = mutation({
 
     // Create video record
     const videoId = await ctx.db.insert("videos", {
-      userId: args.userId,
+      userId: user._id,
       youtubeUrl: args.youtubeUrl,
-      title: youtubeId || "", // Empty title initially, will be updated with metadata
+      youtubeId: youtubeId || "", // Empty title initially, will be updated with metadata
       status: "processing",
       createdAt: Date.now(),
       updatedAt: Date.now(),

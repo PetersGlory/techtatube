@@ -1,7 +1,7 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { 
@@ -12,14 +12,16 @@ import {
   Video,
   LineChart,
   CreditCard, 
-  Home
+  Home,
+  LogOut
 } from "lucide-react";
 import { routes } from "@/lib/navigation";
 import { useUser } from "@clerk/nextjs";
 
-export const DashboardSidebar = () => {
+export const DashboardSidebar = ({isOpened}: {isOpened: boolean}) => {
   const pathname = usePathname();
   const { user } = useUser();
+  const router = useRouter();
 
   const sidebarItems = [
     {
@@ -29,35 +31,50 @@ export const DashboardSidebar = () => {
       requiresAuth: true,
     },
     {
-      title: "Videos",
+      title: "My Videos",
       icon: <Video className="w-4 h-4" />,
       href: routes.videos,
       requiresAuth: true,
     },
     {
-      title: "Analysis",
+      title: "My Content",
+      icon: <ScrollText className="w-4 h-4" />,
+      href: "/content/generate",
+      requiresAuth: true,
+    },
+    {
+      title: "Video Analysis",
       icon: <LineChart className="w-4 h-4" />,
       href: routes.analysis,
       requiresAuth: true,
     },
     {
-      title: "History",
+      title: "Processing History",
       icon: <History className="w-4 h-4" />,
       href: "/history",
       requiresAuth: true,
     },
     {
-      title: "Subscription",
+      title: "Manage Subscription",
       icon: <CreditCard className="w-4 h-4" />,
       href: routes.pricing,
       requiresAuth: false,
     },
+    // {
+    //   title: "Settings",
+    //   icon: <Settings className="w-4 h-4" />,
+    //   href: "/settings",
+    //   requiresAuth: true,
+    // },
   ];
 
   return (
-    <div className="hidden md:flex h-screen w-64 flex-col fixed left-0 top-0 border-r bg-muted/10">
-      <div className="p-6">
+    <div className={`md:flex h-screen w-64 flex-col fixed left-0 top-0 border-r bg-muted/10 ${isOpened ? "translate-x-0" : "translate-x-0"}`}>
+      <div className="p-6 w-full flex flex-row items-center justify-between">
         <h2 className="text-lg font-semibold">Dashboard</h2>
+        <Button variant="ghost" size="icon" className="items-center" onClick={()=> router.replace("/")}>
+          <LogOut className="w-4 h-4 text-white" />
+        </Button>
       </div>
       <div className="flex-1 space-y-1 p-2">
         {sidebarItems.map((item) => {

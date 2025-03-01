@@ -1,3 +1,5 @@
+"use server"
+
 import { YoutubeTranscript } from 'youtube-transcript';
 
 interface TranscriptPart {
@@ -6,17 +8,14 @@ interface TranscriptPart {
   offset: number;
 }
 
-export async function getTranscript(videoId: string, language = 'en') {
+export async function getTranscript(videoId: string, language = 'en', userId?: string) {
+  if (!userId) {
+    throw new Error('Unauthorized: User ID is required to fetch transcript');
+  }
+
   try {
-    const transcript = await YoutubeTranscript.fetchTranscript(videoId);
-
-    // Combine all transcript parts into one text
-    const fullText = transcript
-      .map(part => part.text)
-      .join(' ')
-      .replace(/\s+/g, ' ')
-      .trim();
-
+    const transcript = await YoutubeTranscript.fetchTranscript(videoId, { lang: language });
+    const fullText = transcript.map(part => part.text).join(' ').trim();
     return fullText;
   } catch (error) {
     console.error('Error fetching transcript:', error);

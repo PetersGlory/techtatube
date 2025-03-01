@@ -37,7 +37,7 @@ export default function VideosPage() {
 
   if (!isLoaded || !videos) return <LoadingSkeleton />;
 
-  const filteredVideos = videos?.filter(video => {
+  const filteredVideos = videos?.filter((video) => {
     const matchesSearch = video.title?.toLowerCase().includes(searchTerm.toLowerCase()) ?? false;
     const matchesStatus = statusFilter === "all" || video.status === statusFilter;
     return matchesSearch && matchesStatus;
@@ -45,9 +45,9 @@ export default function VideosPage() {
 
   const stats = {
     total: videos?.length ?? 0,
-    processing: videos?.filter(v => v.status === "processing").length ?? 0,
-    completed: videos?.filter(v => v.status === "completed").length ?? 0,
-    failed: videos?.filter(v => v.status === "failed").length ?? 0,
+    processing: videos?.filter((v) => v.status === "processing").length ?? 0,
+    completed: videos?.filter((v) => v.status === "completed").length ?? 0,
+    failed: videos?.filter((v) => v.status === "failed").length ?? 0,
   };
 
   return (

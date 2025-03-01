@@ -7,6 +7,9 @@ const nextConfig = {
   images: {
     domains: ['img.youtube.com', 'i.ytimg.com'],
   },
+  experimental: {
+    serverActions: true,
+  },
 };
 
 module.exports = nextConfig;

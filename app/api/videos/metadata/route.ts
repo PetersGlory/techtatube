@@ -1,3 +1,5 @@
+
+
 import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs";
 import { ConvexHttpClient } from "convex/browser";
@@ -27,14 +29,14 @@ export async function POST(req: Request) {
       ...metadata,
     });
 
-    showToast.success("Metadata Updated", "Video information has been updated.");
+    // showToast.success("Metadata Updated", "Video information has been updated.");
     return NextResponse.json(metadata);
   } catch (error) {
     console.error("Error fetching video metadata:", error);
-    showToast.error(
-      "Metadata Error",
-      "Failed to fetch video metadata. Please try again."
-    );
+    // showToast.error(
+    //   "Metadata Error",
+    //   "Failed to fetch video metadata. Please try again."
+    // );
     return new NextResponse("Failed to fetch video metadata", { status: 500 });
   }
 } 

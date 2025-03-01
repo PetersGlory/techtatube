@@ -1,4 +1,4 @@
-/* eslint-disable @next/next/no-img-element */
+
 "use client";
 
 import { useQuery, useMutation } from "convex/react";
@@ -15,9 +15,11 @@ import { Id } from "@/convex/_generated/dataModel";
 import { RetryAnalysisButton } from "@/components/retry-analysis-button";
 import { Button } from "@/components/ui/button";
 import { showToast } from "@/lib/toast-utils";
+import { useAuth } from "@clerk/nextjs";
 
 export default function VideoPage() {
   const { videoId } = useParams();
+  const {user} = useAuth();
   
   const video = useQuery(api.videos.getVideo, { 
     videoId: videoId as Id<"videos"> 
@@ -31,15 +33,16 @@ export default function VideoPage() {
     videoId: videoId as Id<"videos">
   });
 
-  const generateTitle = useMutation(api.generationJobs.create);
-  const generateThumbnail = useMutation(api.generationJobs.create);
+    const generateTitle = useMutation(api.generations.create);
+    const generateThumbnail = useMutation(api.generations.create);
+
 
   const handleGenerateTitle = async () => {
     try {
       showToast.loading("Generating", "Creating title variations...");
       await generateTitle({
         videoId: video!._id,
-        userId: video!.userId,
+        userId: user!.id,
         type: "title"
       });
       showToast.success("Success", "Title generation started");
@@ -53,7 +56,7 @@ export default function VideoPage() {
       showToast.loading("Generating", "Creating thumbnail variations...");
       await generateThumbnail({
         videoId: video!._id,
-        userId: video!.userId,
+        userId: user!.id,
         type: "image"
       });
       showToast.success("Success", "Thumbnail generation started");

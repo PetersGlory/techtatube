@@ -30,7 +30,7 @@ export default function DashboardLayout({
         "fixed inset-y-0 left-0 z-50 w-64 bg-background border-r transform transition-transform duration-200 ease-in-out md:translate-x-0",
         isSidebarOpen ? "translate-x-0" : "-translate-x-full"
       )}>
-        <DashboardSidebar />
+        <DashboardSidebar isOpened={isSidebarOpen} />
       </div>
 
       {/* Main Content */}

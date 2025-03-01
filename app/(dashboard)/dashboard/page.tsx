@@ -27,15 +27,17 @@ import {
   ResponsiveContainer
 } from 'recharts';
 import { FeatureGate } from "@/components/feature-gate";
-import { useAnalytics } from "@/hooks/use-analytics";
+// import { useAnalytics } from "@/hooks/use-analytics";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import Link from "next/link";
-import { routes } from "@/lib/navigation";
+// import { routes } from "@/lib/navigation";
 import { formatDistanceToNow } from "date-fns";
 import { Video } from "@/convex/types";
 import { Badge } from "@/components/ui/badge";
 import { YoutubeForm } from "@/components/youtube-form";
+import ToastHandler from "@/components/ToastHandler";
+import { useRouter } from "next/navigation";
 
 export default function DashboardPage() {
   const { user, isLoaded } = useUser();
@@ -48,7 +50,9 @@ export default function DashboardPage() {
   const createContent = useMutation(api.content.createContent);
   const deleteContent = useMutation(api.content.deleteContent);
   const updateContent = useMutation(api.content.updateContent);
-
+  const userPlan = useQuery(api.users.getUser, { userId: user?.id ?? "" });
+  const { showToast } = ToastHandler();
+  const router = useRouter();
   // State for filtering and sorting
   const [searchTerm, setSearchTerm] = useState("");
   const [contentType, setContentType] = useState("all");
@@ -100,6 +104,18 @@ export default function DashboardPage() {
     completed: videos?.filter(v => v.status === "completed").length ?? 0,
     failed: videos?.filter(v => v.status === "failed").length ?? 0,
   };
+
+  // const handleSelectPlan = async (plan: string) => {
+  //   try {
+  //     await updateUserPlan({
+  //       userId: user?.id ?? "",
+  //       plan: plan,
+  //     });
+  //     showToast("success", `You have selected the ${plan} plan.`);
+  //   } catch (error) {
+  //     showToast("error", "Failed to update your plan.");
+  //   }
+  // };
 
   return (
     <div className="space-y-8">
@@ -380,7 +396,7 @@ export default function DashboardPage() {
                 <Button 
                   variant="ghost" 
                   size="sm"
-                  onClick={() => updateContent({ id: item._id, ...item })}
+                  onClick={() => router.push(`/content/${item._id}`)}
                 >
                   <Edit2 className="h-4 w-4" />
                 </Button>
@@ -395,6 +411,9 @@ export default function DashboardPage() {
             </div>
           ))}
         </div>
+      </div>
+      <div>
+        <h2>Your Current Plan: {userPlan ? userPlan.plan : 'No plan selected'}</h2>
       </div>
     </div>
   )

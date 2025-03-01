@@ -66,3 +66,11 @@ export const updateContent = mutation({
     });
   },
 }); 
+
+export const getContentById = query({
+  args: { contentId: v.id("content") },
+  handler: async (ctx, args) => {
+    const content = await ctx.db.get(args.contentId);
+    return content || null; // Return null if no content found
+  },
+}); 

@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { SignIn, SignInButton, SignUpButton } from "@clerk/nextjs";
+import { SignIn, SignInButton, SignUpButton, UserButton, useUser } from "@clerk/nextjs";
 import {
   ChevronRight,
   Command,
@@ -20,6 +20,7 @@ import { useState } from "react";
 import { AuthRedirect } from "@/components/auth-redirect";
 import Link from "next/link";
 import { routes } from "@/lib/navigation";
+import { useRouter } from "next/navigation";
 
 // Animation variants
 const fadeInUp = {
@@ -50,6 +51,12 @@ const slideIn = {
 
 export default function Home() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const user = useUser();
+  const router = useRouter();
+
+  const handleSelectPlan = async (plan: string) => {
+    router.push(routes.pricing);
+  };
 
   return (
     <>
@@ -63,8 +70,8 @@ export default function Home() {
             transition={{ duration: 0.5 }}
             className="fixed top-0 w-full z-50 bg-[#0A0A0A]/80 backdrop-blur-sm border-b border-gray-800/50"
           >
-            <div className="container flex h-16 w-full items-center justify-between">
-              <div className="flex items-center">
+            <div className="px-4 md:px-16 flex h-16 w-full items-center justify-between">
+              <div className="flex items-center gap-4">
                 <a
                   href="#"
                   className="flex items-center gap-2 text-white font-bold text-xl"
@@ -99,19 +106,33 @@ export default function Home() {
 
               {/* Desktop Auth Buttons */}
               <div className="hidden md:flex items-center gap-4">
-                <SignInButton mode="modal">
-                  <Button
-                    variant="ghost"
-                    className="text-gray-400 hover:text-white"
-                  >
-                    Sign In
-                  </Button>
-                </SignInButton>
+                {user ? (
+                  <Link href={routes.dashboard}>
+                    <Button
+                      variant="ghost"
+                      className="text-gray-400 bg-white/5 hover:text-white"
+                    >
+                     <UserButton /> Dashboard
+                    </Button>
+                  </Link>
+                ) : (
+                  <SignInButton mode="modal">
+                    <Button
+                      variant="ghost"
+                      className="text-gray-400 hover:text-white"
+                    >
+                      Sign In
+                    </Button>
+                  </SignInButton>
+                )}
+               
+               {!user && (
                 <SignUpButton mode="modal">
                   <Button className="bg-yellow-400 text-black hover:bg-yellow-500">
                     Get Started
                   </Button>
                 </SignUpButton>
+               )}
               </div>
             </div>
 
@@ -181,20 +202,29 @@ export default function Home() {
                   variants={fadeInUp}
                   className="max-w-4xl mx-auto text-center"
                 >
+                  <motion.div
+                    variants={scaleIn}
+                    className="inline-flex items-center bg-white/5 rounded-full px-4 py-1.5 mb-8 border border-white/10"
+                  >
+                    <span className="text-sm">
+                      🚀 AI-Powered Content Creation
+                    </span>
+                  </motion.div>
+
                   <motion.h1
                     variants={fadeInUp}
-                    className="text-5xl md:text-7xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-yellow-400 to-purple-400"
+                    className="text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight mb-8"
                   >
-                    Transform Your Content Creation
+                    Smart Solutions,<span className="text-gray-400">And</span>
+                    <br />
+                    Simple <span className="text-yellow-400">Interface</span>
                   </motion.h1>
 
-                  <motion.p
-                    variants={fadeInUp}
-                    className="text-xl md:text-2xl text-gray-300 mb-8 max-w-2xl mx-auto"
-                  >
-                    Unlock the power of AI to analyze, optimize, and enhance
-                    your video content with TechtaTube.
-                  </motion.p>
+                  <p className="text-gray-400 max-w-2xl mx-auto mb-12 text-lg">
+                    The power of AI-driven content creation, providing
+                    intelligent insights and predictive analytics to elevate
+                    your online presence.
+                  </p>
 
                   <motion.div
                     variants={fadeInUp}
@@ -470,16 +500,11 @@ export default function Home() {
                 <div className="text-center mb-16">
                   <motion.div variants={fadeInUp}>
                     <div className="inline-flex items-center bg-yellow-400/10 rounded-full px-4 py-1.5 mb-8">
-                      <span className="text-yellow-400 text-sm">
-                        Pricing Plans
-                      </span>
+                      <span className="text-yellow-400 text-sm">Pricing Plans</span>
                     </div>
-                    <h2 className="text-4xl font-bold mb-4">
-                      Choose Your Perfect Plan
-                    </h2>
+                    <h2 className="text-4xl font-bold mb-4">Choose Your Perfect Plan</h2>
                     <p className="text-gray-400 max-w-2xl mx-auto">
-                      Select the plan that best fits your needs. All plans
-                      include our core features with different usage limits.
+                      Select the plan that best fits your needs. All plans include our core features with different usage limits.
                     </p>
                   </motion.div>
                 </div>
@@ -499,9 +524,7 @@ export default function Home() {
                         <span className="text-4xl font-bold">$0</span>
                         <span className="text-gray-400 ml-2">/month</span>
                       </div>
-                      <p className="text-gray-400">
-                        Perfect for trying out our features
-                      </p>
+                      <p className="text-gray-400">Perfect for trying out our features</p>
                       <ul className="space-y-3 py-6">
                         <li className="flex items-center">
                           <Check className="h-5 w-5 text-yellow-400 mr-2" />
@@ -516,7 +539,10 @@ export default function Home() {
                           <span>Community support</span>
                         </li>
                       </ul>
-                      <Button className="w-full text-gray-800 bg-white/90 hover:bg-white/80">
+                      <Button
+                        className="w-full text-gray-800 bg-white/90 hover:bg-white/80"
+                        onClick={() => handleSelectPlan("starter")}
+                      >
                         Get Started
                       </Button>
                     </div>
@@ -538,9 +564,7 @@ export default function Home() {
                         <span className="text-4xl font-bold">$29</span>
                         <span className="text-gray-400 ml-2">/month</span>
                       </div>
-                      <p className="text-gray-400">
-                        For content creators and small teams
-                      </p>
+                      <p className="text-gray-400">For content creators and small teams</p>
                       <ul className="space-y-3 py-6">
                         <li className="flex items-center">
                           <Check className="h-5 w-5 text-yellow-400 mr-2" />
@@ -559,7 +583,10 @@ export default function Home() {
                           <span>Custom branding</span>
                         </li>
                       </ul>
-                      <Button className="w-full bg-yellow-400 text-black hover:bg-yellow-500">
+                      <Button
+                        className="w-full bg-yellow-400 text-black hover:bg-yellow-500"
+                        onClick={() => handleSelectPlan("pro")}
+                      >
                         Start Pro Trial
                       </Button>
                     </div>
@@ -576,9 +603,7 @@ export default function Home() {
                         <span className="text-4xl font-bold">$99</span>
                         <span className="text-gray-400 ml-2">/month</span>
                       </div>
-                      <p className="text-gray-400">
-                        For large teams and organizations
-                      </p>
+                      <p className="text-gray-400">For large teams and organizations</p>
                       <ul className="space-y-3 py-6">
                         <li className="flex items-center">
                           <Check className="h-5 w-5 text-yellow-400 mr-2" />
@@ -601,15 +626,28 @@ export default function Home() {
                           <span>Custom integrations</span>
                         </li>
                       </ul>
-                      <Button className="w-full text-gray-800 bg-white/90 hover:bg-white/80">
+                      <Button
+                        className="w-full text-gray-800 bg-white/90 hover:bg-white/80"
+                        onClick={() => handleSelectPlan("enterprise")}
+                      >
                         Contact Sales
                       </Button>
                     </div>
                   </motion.div>
                 </motion.div>
+              </div>
+            </motion.section>
 
-                {/* FAQ Section */}
-                <motion.div variants={fadeInUp} className="mt-20 text-center">
+            {/* FAQ Section */}
+            <motion.section
+              initial="initial"
+              whileInView="animate"
+              viewport={{ once: true }}
+              variants={staggerContainer}
+              className="py-20"
+            >
+              <div className="container max-w-6xl mx-auto px-4">
+                <div className="text-center mb-16">
                   <h3 className="text-2xl font-semibold mb-4">
                     Frequently Asked Questions
                   </h3>
@@ -641,7 +679,7 @@ export default function Home() {
                       </div>
                     ))}
                   </div>
-                </motion.div>
+                </div>
               </div>
             </motion.section>
 

@@ -46,6 +46,11 @@ export function ContentForm() {
       })
 
       if (!response.ok) {
+        toast({
+          title: "Error",
+          description: "Failed to generate content. Please try again.",
+          variant: "destructive",
+        })
         throw new Error("Failed to generate content")
       }
 
@@ -55,10 +60,11 @@ export function ContentForm() {
         description: "Your content has been created and saved.",
       })
       // Handle the generated content (e.g., display it, save it, etc.)
-    } catch (error) {
+    } catch (error:unknown) {
+      console.log(error)
       toast({
         title: "Error",
-        description: "Failed to generate content. Please try again.",
+        description:  "Failed to generate content. Please try again.",
         variant: "destructive",
       })
     } finally {

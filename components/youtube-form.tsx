@@ -38,7 +38,7 @@ export function YoutubeForm() {
       const response = await fetch("/api/videos/transcript", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ videoId, youtubeId }),
+        body: JSON.stringify({ videoId, youtubeId, userId: user!.id }),
       });
 
       const data = await response.json();
