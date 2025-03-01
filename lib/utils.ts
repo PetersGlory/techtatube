@@ -76,3 +76,10 @@ export const parseScriptContent = (content: string) => {
     }
     return firstLine || title || "YouTube Script";
   };
+
+  export const formatCreationDate = (createdAt: string) => {
+    if (createdAt) {
+      return new Date(createdAt).toLocaleDateString();
+    }
+    return "Unknown date";
+  };
