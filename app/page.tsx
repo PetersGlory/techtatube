@@ -1,7 +1,13 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { SignIn, SignInButton, SignUpButton, UserButton, useUser } from "@clerk/nextjs";
+import {
+  SignIn,
+  SignInButton,
+  SignUpButton,
+  UserButton,
+  useUser,
+} from "@clerk/nextjs";
 import {
   ChevronRight,
   Command,
@@ -106,7 +112,7 @@ export default function Home() {
 
               {/* Desktop Auth Buttons */}
               <div className="hidden md:flex items-center gap-4">
-                {!user ? (
+                {!user.isSignedIn ? (
                   <SignInButton mode="modal">
                     <Button
                       variant="ghost"
@@ -121,18 +127,18 @@ export default function Home() {
                       variant="ghost"
                       className="text-gray-400 bg-white/5 hover:text-white"
                     >
-                     <UserButton /> Dashboard
+                      <UserButton /> Dashboard
                     </Button>
                   </Link>
                 )}
-               
-               {!user && (
-                <SignUpButton mode="modal">
-                  <Button className="bg-yellow-400 text-black hover:bg-yellow-500">
-                    Get Started
-                  </Button>
-                </SignUpButton>
-               )}
+
+                {!user.isSignedIn && (
+                  <SignUpButton mode="modal">
+                    <Button className="bg-yellow-400 text-black hover:bg-yellow-500">
+                      Get Started
+                    </Button>
+                  </SignUpButton>
+                )}
               </div>
             </div>
 
@@ -159,29 +165,32 @@ export default function Home() {
                       )
                     )}
                     <div className="flex flex-col gap-2 p-4 border-t border-gray-800/50">
-                      
-                    {user ? (
-                  <Link href={routes.dashboard}>
-                    <Button
-                      variant="ghost"
-                      className="text-gray-400 bg-white/5 hover:text-white"
-                    >
-                     <UserButton /> Dashboard
-                    </Button>
-                  </Link>
-                ) : (<SignInButton mode="modal">
-                        <Button
-                          variant="ghost"
-                          className="w-full text-gray-400 hover:text-white"
-                        >
-                          Sign In
-                        </Button>
-                      </SignInButton>)}
-                      {!user && (<SignUpButton mode="modal">
-                        <Button className="w-full bg-yellow-400 text-black hover:bg-yellow-500">
-                          Get Started
-                        </Button>
-                      </SignUpButton>)}
+                      {user.isSignedIn ? (
+                        <Link href={routes.dashboard}>
+                          <Button
+                            variant="ghost"
+                            className="text-gray-400 bg-white/5 hover:text-white"
+                          >
+                            <UserButton /> Dashboard
+                          </Button>
+                        </Link>
+                      ) : (
+                        <SignInButton mode="modal">
+                          <Button
+                            variant="ghost"
+                            className="w-full text-gray-400 hover:text-white"
+                          >
+                            Sign In
+                          </Button>
+                        </SignInButton>
+                      )}
+                      {!user.isSignedIn && (
+                        <SignUpButton mode="modal">
+                          <Button className="w-full bg-yellow-400 text-black hover:bg-yellow-500">
+                            Get Started
+                          </Button>
+                        </SignUpButton>
+                      )}
                     </div>
                   </nav>
                 </div>
@@ -510,11 +519,16 @@ export default function Home() {
                 <div className="text-center mb-16">
                   <motion.div variants={fadeInUp}>
                     <div className="inline-flex items-center bg-yellow-400/10 rounded-full px-4 py-1.5 mb-8">
-                      <span className="text-yellow-400 text-sm">Pricing Plans</span>
+                      <span className="text-yellow-400 text-sm">
+                        Pricing Plans
+                      </span>
                     </div>
-                    <h2 className="text-4xl font-bold mb-4">Choose Your Perfect Plan</h2>
+                    <h2 className="text-4xl font-bold mb-4">
+                      Choose Your Perfect Plan
+                    </h2>
                     <p className="text-gray-400 max-w-2xl mx-auto">
-                      Select the plan that best fits your needs. All plans include our core features with different usage limits.
+                      Select the plan that best fits your needs. All plans
+                      include our core features with different usage limits.
                     </p>
                   </motion.div>
                 </div>
@@ -534,7 +548,9 @@ export default function Home() {
                         <span className="text-4xl font-bold">$0</span>
                         <span className="text-gray-400 ml-2">/month</span>
                       </div>
-                      <p className="text-gray-400">Perfect for trying out our features</p>
+                      <p className="text-gray-400">
+                        Perfect for trying out our features
+                      </p>
                       <ul className="space-y-3 py-6">
                         <li className="flex items-center">
                           <Check className="h-5 w-5 text-yellow-400 mr-2" />
@@ -574,7 +590,9 @@ export default function Home() {
                         <span className="text-4xl font-bold">$29</span>
                         <span className="text-gray-400 ml-2">/month</span>
                       </div>
-                      <p className="text-gray-400">For content creators and small teams</p>
+                      <p className="text-gray-400">
+                        For content creators and small teams
+                      </p>
                       <ul className="space-y-3 py-6">
                         <li className="flex items-center">
                           <Check className="h-5 w-5 text-yellow-400 mr-2" />
@@ -613,7 +631,9 @@ export default function Home() {
                         <span className="text-4xl font-bold">$99</span>
                         <span className="text-gray-400 ml-2">/month</span>
                       </div>
-                      <p className="text-gray-400">For large teams and organizations</p>
+                      <p className="text-gray-400">
+                        For large teams and organizations
+                      </p>
                       <ul className="space-y-3 py-6">
                         <li className="flex items-center">
                           <Check className="h-5 w-5 text-yellow-400 mr-2" />

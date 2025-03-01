@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/rules-of-hooks */
 /* eslint-disable @next/next/no-img-element */
 
 "use client";
@@ -11,16 +12,20 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { VideoTranscript } from "@/components/video-transcript";
 import { VideoChat } from "@/components/video-chat";
 import { formatDistanceToNow } from "date-fns";
-import { FileText, MessageSquare, BarChart, Wand2, Image, Type } from "lucide-react";
+import { FileText, MessageSquare, BarChart, Wand2, Image, Type, AlertCircle } from "lucide-react";
 import { Id } from "@/convex/_generated/dataModel";
 import { RetryAnalysisButton } from "@/components/retry-analysis-button";
 import { Button } from "@/components/ui/button";
 import { showToast } from "@/lib/toast-utils";
 import { useUser } from "@clerk/nextjs";
+import { useEffect, useState } from "react";
+import { getVideoDetails, VideoDetails } from "@/lib/youtube";
+import { Progress } from "@/components/ui/progress";
 
 export default function VideoPage() {
   const { videoId } = useParams();
   const {user} = useUser();
+  const [videoDetails, setVideoDetails] = useState<VideoDetails | null>(null);
   
   const video = useQuery(api.videos.getVideo, { 
     videoId: videoId as Id<"videos"> 
@@ -34,9 +39,8 @@ export default function VideoPage() {
     videoId: videoId as Id<"videos">
   });
 
-    const generateTitle = useMutation(api.generations.create);
-    const generateThumbnail = useMutation(api.generations.create);
-
+  const generateTitle = useMutation(api.generations.create);
+  const generateThumbnail = useMutation(api.generations.create);
 
   const handleGenerateTitle = async () => {
     try {
@@ -65,6 +69,16 @@ export default function VideoPage() {
       showToast.error("Error", "Failed to start thumbnail generation");
     }
   };
+  
+  useEffect(() => {
+    const fetchVideoDetails = async () => {
+      if(video){
+        const videoDetails = await getVideoDetails(video.youtubeId);
+        setVideoDetails(videoDetails);
+      }
+    }
+    fetchVideoDetails();
+  }, [video]);
 
   if (!video) return null;
 
@@ -73,84 +87,115 @@ export default function VideoPage() {
     (!transcript && !analysis) ||
     (video.status === "completed" && (!transcript || !analysis));
 
+  // Calculate progress based on status
+  const getProgressValue = () => {
+    switch(video.status) {
+      case "processing": return 60;
+      case "completed": return 100;
+      case "failed": return 100;
+      default: return 30;
+    }
+  };
+
   return (
-    <div className="flex h-[calc(100vh-4rem)] gap-4 p-4">
+    <div className="flex h-[calc(100vh-4rem)] gap-4 py-4 w-full">
       {/* Left Side - Video Analysis */}
-      <div className="flex-1 overflow-auto">
-        <Card className="p-4 mb-4">
-          <div className="flex items-start gap-4">
-            {video.thumbnailUrl && (
+      <div className="flex-1 overflow-auto px-2">
+        <div className="mb-6">
+          <h1 className="text-2xl font-bold mb-2">Analyse Video</h1>
+          <div className="flex items-center justify-between mb-2 w-auto">
+            <Progress value={getProgressValue()} className="h-2" />
+            <span className="text-sm font-medium ml-2">{getProgressValue()} / 100</span>
+          </div>
+          
+          {video.status === "processing" && (
+            <div className="bg-amber-500/10 border border-amber-500/30 rounded-lg p-4 flex items-start gap-3 mt-4">
+              <AlertCircle className="h-5 w-5 text-amber-500 mt-0.5" />
+              <div>
+                <p className="font-medium text-amber-500">This is your first time analysing this video</p>
+                <p className="text-sm text-muted-foreground">(1 analysis token is being used!)</p>
+              </div>
+            </div>
+          )}
+        </div>
+
+        <Card className="p-4 mb-6 overflow-hidden">
+          {videoDetails?.thumbnail && (
+            <div className="relative w-full h-[500px] mb-4 rounded-md overflow-hidden">
               <img
-                src={video.thumbnailUrl}
-                alt={video.title}
-                className="w-40 h-24 object-cover rounded-md"
+                src={videoDetails.thumbnail}
+                alt={videoDetails.title}
+                className="w-full h-full object-cover"
               />
-            )}
-            <div className="flex-1">
-              <div className="flex items-center justify-between">
-                <h1 className="text-xl font-bold mb-2">{video.title}</h1>
-                <div className="flex items-center gap-2">
-                  {needsReprocessing && (
-                    <RetryAnalysisButton 
-                      videoId={video._id}
-                      youtubeUrl={video.youtubeUrl}
-                    />
-                  )}
-                  <Badge variant={
-                    video.status === "completed" ? "success" : 
-                    video.status === "failed" ? "destructive" : 
-                    "secondary"
-                  }>
-                    {video.status}
-                  </Badge>
+              <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex items-end">
+                <div className="p-4 w-full">
+                  <h1 className="text-2xl font-bold text-white mb-2">{videoDetails?.title}</h1>
+                  <div className="flex items-center gap-2">
+                    <Badge variant={
+                      video.status === "completed" ? "success" : 
+                      video.status === "failed" ? "destructive" : 
+                      "secondary"
+                    }>
+                      {video.status}
+                    </Badge>
+                    <span className="text-sm text-white/80">
+                      Processed {formatDistanceToNow(videoDetails?.publishedAt || new Date())} ago
+                    </span>
+                  </div>
                 </div>
               </div>
-              <div className="text-sm text-muted-foreground mt-2">
-                Processed {formatDistanceToNow(video.createdAt)} ago
-              </div>
-              {video.description && (
-                <p className="text-sm text-muted-foreground mt-2">
-                  {video.description}
+            </div>
+          )}
+          
+          <div className="flex items-start gap-4">
+            <div className="flex-1">
+              {videoDetails?.description && (
+                <p className="text-sm text-muted-foreground mb-4 line-clamp-3">
+                  {videoDetails?.description}
                 </p>
               )}
               
               {/* Quick Actions */}
-              {video.status === "completed" && (
-                <div className="flex gap-2 mt-4">
-                  <Button 
-                    variant="outline" 
-                    size="sm"
-                    onClick={handleGenerateTitle}
-                  >
-                    <Type className="h-4 w-4 mr-2" />
-                    Generate Title
-                  </Button>
-                  <Button 
-                    variant="outline" 
-                    size="sm"
-                    onClick={handleGenerateThumbnail}
-                  >
-                    <Image className="h-4 w-4 mr-2" />
-                    Generate Thumbnail
-                  </Button>
-                  <Button 
-                    variant="outline" 
-                    size="sm"
-                    asChild
-                  >
-                    <a href={video.youtubeUrl} target="_blank" rel="noopener noreferrer">
-                      <Wand2 className="h-4 w-4 mr-2" />
-                      Enhance Video
-                    </a>
-                  </Button>
-                </div>
-              )}
+              <div className="flex flex-wrap gap-2">
+                {needsReprocessing && (
+                  <RetryAnalysisButton 
+                    videoId={video._id}
+                    youtubeUrl={video.youtubeUrl}
+                  />
+                )}
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={handleGenerateTitle}
+                >
+                  <Type className="h-4 w-4 mr-2" />
+                  Generate Title
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={handleGenerateThumbnail}
+                >
+                  <Image className="h-4 w-4 mr-2" />
+                  Generate Thumbnail
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  asChild
+                >
+                  <a href={video.youtubeUrl} target="_blank" rel="noopener noreferrer">
+                    <Wand2 className="h-4 w-4 mr-2" />
+                    Enhance Video
+                  </a>
+                </Button>
+              </div>
             </div>
           </div>
         </Card>
 
         <Tabs defaultValue="transcript">
-          <TabsList>
+          <TabsList className="mb-4">
             <TabsTrigger value="transcript">
               <FileText className="w-4 h-4 mr-2" />
               Transcript
@@ -160,7 +205,7 @@ export default function VideoPage() {
               Analysis
             </TabsTrigger>
           </TabsList>
-          <TabsContent value="transcript" className="mt-4">
+          <TabsContent value="transcript">
             {transcript ? (
               <VideoTranscript videoId={video._id} />
             ) : (
@@ -173,7 +218,7 @@ export default function VideoPage() {
               </Card>
             )}
           </TabsContent>
-          <TabsContent value="analysis" className="mt-4">
+          <TabsContent value="analysis">
             {analysis ? (
               <div className="space-y-4">
                 <Card className="p-4">
@@ -240,7 +285,7 @@ export default function VideoPage() {
             Chat with AI about the video content
           </p>
         </div>
-        {video.status === "completed" || video.status === "processing" ? (
+        {video ?(
           <VideoChat 
             videoId={video._id} 
             transcript={transcript?.content}
