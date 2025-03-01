@@ -159,19 +159,29 @@ export default function Home() {
                       )
                     )}
                     <div className="flex flex-col gap-2 p-4 border-t border-gray-800/50">
-                      <SignInButton mode="modal">
+                      
+                    {user ? (
+                  <Link href={routes.dashboard}>
+                    <Button
+                      variant="ghost"
+                      className="text-gray-400 bg-white/5 hover:text-white"
+                    >
+                     <UserButton /> Dashboard
+                    </Button>
+                  </Link>
+                ) : (<SignInButton mode="modal">
                         <Button
                           variant="ghost"
                           className="w-full text-gray-400 hover:text-white"
                         >
                           Sign In
                         </Button>
-                      </SignInButton>
-                      <SignUpButton mode="modal">
+                      </SignInButton>)}
+                      {!user && (<SignUpButton mode="modal">
                         <Button className="w-full bg-yellow-400 text-black hover:bg-yellow-500">
                           Get Started
                         </Button>
-                      </SignUpButton>
+                      </SignUpButton>)}
                     </div>
                   </nav>
                 </div>
