@@ -35,6 +35,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       createUser({
         userId: user.id,
         email: user.emailAddresses[0].emailAddress,
+        plan: "free"
       });
       setIsLoading(false);
     }
