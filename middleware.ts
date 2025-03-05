@@ -8,7 +8,11 @@ export default authMiddleware({
     "/api/webhook/stripe",
     "/sign-in",
     "/sign-up",
+    "/videos/:videoId*", // Make video routes public
   ],
+  ignoredRoutes: [
+    "/((?!api|trpc))(_next.*|.+.[w]+$)",
+  ]
 });
 
 export const config = {

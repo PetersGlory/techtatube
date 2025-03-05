@@ -21,9 +21,42 @@ interface TranscriptSegment {
 }
 
 function decodeHtmlEntities(str: string) {
+  // Create a textarea element to decode HTML entities
   const textarea = document.createElement('textarea');
   textarea.innerHTML = str;
-  return textarea.value;
+  
+  // Get the decoded text
+  let decoded = textarea.value;
+  
+  // Additional cleanup
+  decoded = decoded
+    // Replace common HTML entities
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&rsquo;/g, "'")
+    .replace(/&lsquo;/g, "'")
+    .replace(/&ndash;/g, '–')
+    .replace(/&mdash;/g, '—')
+    // Remove any remaining HTML entities
+    .replace(/&#?[a-zA-Z0-9]+;/g, ' ')
+    // Fix multiple spaces
+    .replace(/\s+/g, ' ')
+    .trim();
+    
+  return decoded;
+}
+
+// Function to clean up text before displaying
+function cleanupText(text: string): string {
+  return text
+    // Ensure proper spacing after punctuation
+    .replace(/([.!?])\s*/g, '$1 ')
+    // Remove extra spaces
+    .replace(/\s+/g, ' ')
+    .trim();
 }
 
 // Function to format seconds to MM:SS format
@@ -35,23 +68,30 @@ function formatTime(seconds: number): string {
 
 // Function to parse transcript into segments with timestamps
 function parseTranscript(content: string): TranscriptSegment[] {
-  // Simple parsing - this can be enhanced based on your transcript format
   const segments: TranscriptSegment[] = [];
+  
+  // First decode HTML entities
+  const decodedContent = decodeHtmlEntities(content);
+  
+  // Split content into sentences and clean up
+  const sentences = decodedContent
+    .replace(/([.!?])\s+/g, '$1\n')  // Split on sentence endings
+    .split('\n')
+    .map(s => cleanupText(s))
+    .filter(s => s.length > 0);
+  
   let currentTime = 0;
+  const averageSecondsPerSentence = 4;  // Approximate timing
   
-  // Split by sentences (roughly)
-  const sentences = content.split(/(?<=[.!?])\s+/);
-  
-  sentences.forEach((sentence, index) => {
-    if (sentence.trim()) {
-      // Estimate timestamp (this is just a placeholder - ideally you'd have real timestamps)
-      // Assuming average of 3 seconds per sentence
-      currentTime += 3;
-      
+  sentences.forEach((sentence) => {
+    if (sentence) {
       segments.push({
-        text: sentence.trim(),
+        text: sentence,
         timestamp: formatTime(currentTime)
       });
+      // Estimate time based on sentence length
+      const words = sentence.split(/\s+/).length;
+      currentTime += Math.max(averageSecondsPerSentence, words * 0.4);
     }
   });
   
@@ -105,10 +145,13 @@ export function VideoTranscript({ videoId }: VideoTranscriptProps) {
 
   return (
     <Card className="flex flex-col h-[600px]">
-      <div className="px-4 py-3 border-b flex items-center justify-between">
+      <div className="px-4 py-3 border-b flex items-center justify-between bg-muted/30">
         <div className="flex items-center gap-2">
           <FileText className="h-4 w-4 text-muted-foreground" />
           <span className="font-medium">Video Transcript</span>
+          <span className="text-xs text-muted-foreground">
+            ({filteredSegments.length} segments)
+          </span>
         </div>
         <Button 
           variant="ghost" 
@@ -121,7 +164,7 @@ export function VideoTranscript({ videoId }: VideoTranscriptProps) {
         </Button>
       </div>
       
-      <div className="p-3 border-b">
+      <div className="p-3 border-b bg-background">
         <div className="relative">
           <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input
@@ -134,28 +177,28 @@ export function VideoTranscript({ videoId }: VideoTranscriptProps) {
       </div>
       
       <ScrollArea className="flex-1 p-0" ref={scrollAreaRef}>
-        <div className="divide-y">
+        <div className="divide-y divide-border/50">
           {filteredSegments.length > 0 ? (
             filteredSegments.map((segment, index) => (
               <div 
                 key={index} 
-                className="p-3 hover:bg-muted/50 transition-colors flex gap-3"
+                className="p-4 hover:bg-muted/50 transition-colors flex gap-4 group"
               >
-                {segment.timestamp && (
-                  <div className="flex-shrink-0 w-12 flex items-center">
-                    <div className="flex items-center text-xs text-muted-foreground">
-                      <Clock className="h-3 w-3 mr-1" />
-                      {segment.timestamp}
-                    </div>
+                <div className="flex-shrink-0 w-16">
+                  <div className="flex items-center text-xs text-muted-foreground bg-muted/30 px-2 py-1 rounded-md group-hover:bg-muted">
+                    <Clock className="h-3 w-3 mr-1" />
+                    {segment.timestamp}
                   </div>
-                )}
-                <p className="text-sm flex-1">
-                  {searchTerm ? (
-                    highlightText(segment.text, searchTerm)
-                  ) : (
-                    segment.text
-                  )}
-                </p>
+                </div>
+                <div className="flex-1">
+                  <p className="text-sm leading-relaxed">
+                    {searchTerm ? (
+                      highlightText(segment.text, searchTerm)
+                    ) : (
+                      segment.text
+                    )}
+                  </p>
+                </div>
               </div>
             ))
           ) : (

@@ -4,7 +4,6 @@ import { google } from 'googleapis';
 
 const YOUTUBE_API_KEY = process.env.YOUTUBE_API_KEY;
 
-// Fix: Remove the 'new' keyword
 const youtube = google.youtube({
   version: 'v3',
   auth: YOUTUBE_API_KEY,
@@ -12,14 +11,16 @@ const youtube = google.youtube({
 
 export interface VideoDetails {
   title: string;
-  views: string;
-  thumbnail: string;
-  duration: string;
   description: string;
-  channel: ChannelDetails;
-  comments: string;
-  likes: string;
-  publishedAt: string;
+  thumbnail: string;
+  publishedAt: Date;
+  channelTitle: string;
+  channelThumbnail?: string;
+  channelSubscribers?: number;
+  views: number;
+  likes: number;
+  comments: number;
+  duration: string;
 }
 
 export interface ChannelDetails {
@@ -29,6 +30,41 @@ export interface ChannelDetails {
   subscribers: string;
   videos: string;
   publishedAt: string;
+}
+
+async function formatDuration(isoDuration: string): Promise<string> {
+  const matches = isoDuration.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/);
+  if (!matches) return '0:00';
+
+  const [_, hours, minutes, seconds] = matches;
+  const parts = [];
+
+  if (hours) {
+    parts.push(hours);
+  }
+  parts.push(minutes || '0');
+  parts.push(seconds || '0');
+
+  return parts
+    .map(part => part.padStart(2, '0'))
+    .join(':');
+}
+
+export async function getYouTubeVideoId(url: string): Promise<string | null> {
+  const patterns = [
+    /(?:https?:\/\/)?(?:www\.)?youtube\.com\/watch\?v=([^&]+)/,
+    /(?:https?:\/\/)?(?:www\.)?youtube\.com\/embed\/([^/?]+)/,
+    /(?:https?:\/\/)?(?:www\.)?youtu\.be\/([^/?]+)/
+  ];
+
+  for (const pattern of patterns) {
+    const match = url.match(pattern);
+    if (match) {
+      return match[1];
+    }
+  }
+
+  return null;
 }
 
 export async function getVideoMetadata(videoId: string) {
@@ -78,8 +114,6 @@ export async function getVideoTranscript(videoId: string, language = 'en', userI
     });
 
     // Process the transcript data
-    // Note: The actual processing depends on the format returned by the API
-    // This is a simplified example
     const transcriptText = transcript.data.toString();
     
     return transcriptText;
@@ -91,48 +125,50 @@ export async function getVideoTranscript(videoId: string, language = 'en', userI
       throw new Error('Failed to fetch transcript: Unknown error');
     }
   }
-} 
+}
 
-export async function getVideoDetails(videoId: string) {
-  try {   
-    const response = await youtube.videos.list({
-      part: ['snippet', 'contentDetails', 'statistics'],
-      id: [videoId],
-    });
-    console.log("video-Info: ", response.data);
-    const videoDetails = response.data.items?.[0];
-
-    if(!videoDetails) throw new Error("Video not found");
-
-    // return videoDetails;
-    const channelResponse = await youtube.channels.list({
-      part: ['snippet', 'contentDetails', 'statistics'],
-      id: [videoDetails?.snippet?.channelId],
-    });
-    const channelDetails = channelResponse.data.items?.[0];
-    console.log("channel-Info: ", channelResponse.data);
-
-    const videoInfo: VideoDetails = {
-      title: videoDetails?.snippet?.title || '',
-      thumbnail: videoDetails?.snippet?.thumbnails?.high?.url || videoDetails?.snippet?.thumbnails?.default?.url || videoDetails?.snippet?.thumbnails?.maxres?.url || '',
-      duration: videoDetails?.contentDetails?.duration || '',
-      description: videoDetails?.snippet?.description || '',
-      publishedAt: videoDetails?.snippet?.publishedAt || new Date().toISOString(),
-      channel: {
-        title: channelDetails?.snippet?.title || '',
-        description: channelDetails?.snippet?.description || '',
-        thumbnail: channelDetails?.snippet?.thumbnails?.high?.url || channelDetails?.snippet?.thumbnails?.default?.url || channelDetails?.snippet?.thumbnails?.maxres?.url || '',
-        subscribers: channelDetails?.statistics?.subscriberCount || '',
-        videos: channelDetails?.statistics?.videoCount || '',
-        publishedAt: channelDetails?.snippet?.publishedAt || new Date().toISOString(),
-      },
-      views: videoDetails?.statistics?.viewCount || '',
-      comments: videoDetails?.statistics?.commentCount || '',
-      likes: videoDetails?.statistics?.likeCount || '',
+export async function getVideoDetails(videoId: string): Promise<VideoDetails> {
+  try {
+    // Fetch video details
+    const response = await fetch(
+      `https://www.googleapis.com/youtube/v3/videos?id=${videoId}&part=snippet,statistics,contentDetails&key=${YOUTUBE_API_KEY}`
+    );
+    const data = await response.json();
+    
+    console.log("Video data:", data);
+    if (!data.items || data.items.length === 0) {
+      throw new Error('Video not found');
     }
-    return videoInfo;
+
+    const video = data.items[0];
+    const channelId = video.snippet.channelId;
+    
+    // Fetch channel details
+    const channelResponse = await fetch(
+      `https://www.googleapis.com/youtube/v3/channels?id=${channelId}&part=snippet,statistics&key=${YOUTUBE_API_KEY}`
+    );
+    const channelData = await channelResponse.json();
+    
+    const channelInfo = channelData.items?.[0];
+
+    // Format duration from ISO 8601 duration (PT1H2M10S -> 1:02:10)
+    const duration = await formatDuration(video.contentDetails.duration);
+
+    return {
+      title: video.snippet.title,
+      description: video.snippet.description,
+      thumbnail: video.snippet.thumbnails.maxres?.url || video.snippet.thumbnails.high?.url,
+      publishedAt: new Date(video.snippet.publishedAt),
+      channelTitle: video.snippet.channelTitle,
+      channelThumbnail: channelInfo?.snippet?.thumbnails?.default?.url,
+      channelSubscribers: parseInt(channelInfo?.statistics?.subscriberCount || '0'),
+      views: parseInt(video.statistics.viewCount || '0'),
+      likes: parseInt(video.statistics.likeCount || '0'),
+      comments: parseInt(video.statistics.commentCount || '0'),
+      duration: duration
+    };
   } catch (error) {
-    console.error("Error fetching video details:", error);
-    return null;
+    console.error('Error fetching video details:', error);
+    throw error;
   }
 }

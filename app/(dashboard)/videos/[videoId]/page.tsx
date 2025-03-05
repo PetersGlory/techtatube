@@ -12,7 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { VideoTranscript } from "@/components/video-transcript";
 import { VideoChat } from "@/components/video-chat";
 import { formatDistanceToNow } from "date-fns";
-import { FileText, MessageSquare, BarChart, Wand2, Image, Type, AlertCircle } from "lucide-react";
+import { FileText, MessageSquare, BarChart, Wand2, Image, Type, AlertCircle, Lock } from "lucide-react";
 import { Id } from "@/convex/_generated/dataModel";
 import { RetryAnalysisButton } from "@/components/retry-analysis-button";
 import { Button } from "@/components/ui/button";
@@ -21,15 +21,18 @@ import { useUser } from "@clerk/nextjs";
 import { useEffect, useState } from "react";
 import { getVideoDetails, VideoDetails } from "@/lib/youtube";
 import { Progress } from "@/components/ui/progress";
+import { SignInButton } from "@clerk/nextjs";
 
 export default function VideoPage() {
   const { videoId } = useParams();
-  const {user} = useUser();
+  const { user, isLoaded } = useUser();
   const [videoDetails, setVideoDetails] = useState<VideoDetails | null>(null);
   
   const video = useQuery(api.videos.getVideo, { 
     videoId: videoId as Id<"videos"> 
   });
+
+  const updateVideo = useMutation(api.videos.updateVideoStatus);
   
   const analysis = useQuery(api.analysis.getVideoAnalysis, { 
     videoId: videoId as Id<"videos"> 
@@ -43,33 +46,54 @@ export default function VideoPage() {
   const generateThumbnail = useMutation(api.generations.create);
 
   const handleGenerateTitle = async () => {
+    if (!user) {
+      showToast.error("Authentication Required", "Please sign in to generate titles");
+      return;
+    }
+
     try {
       showToast.loading("Generating", "Creating title variations...");
-      await generateTitle({
+      const title = await generateTitle({
         videoId: video!._id,
-        userId: user!.id as Id<"users">,
+        userId: user.id as Id<"users">,
         type: "title"
       });
       showToast.success("Success", "Title generation started");
+      console.log(title);
     } catch (error) {
       showToast.error("Error", "Failed to start title generation");
     }
   };
 
   const handleGenerateThumbnail = async () => {
+    if (!user) {
+      showToast.error("Authentication Required", "Please sign in to generate thumbnails");
+      return;
+    }
+
     try {
       showToast.loading("Generating", "Creating thumbnail variations...");
-      await generateThumbnail({
+      const thumbnail = await generateThumbnail({
         videoId: video!._id,
-        userId: user!.id as Id<"users">,
+        userId: user.id as Id<"users">,
         type: "image"
       });
       showToast.success("Success", "Thumbnail generation started");
+      console.log(thumbnail);
     } catch (error) {
       showToast.error("Error", "Failed to start thumbnail generation");
     }
   };
-  
+
+  const updateStatus = async () => {
+    if (!user) return;
+    
+    await updateVideo({
+      videoId: videoId as Id<"videos">,
+      status: "completed"
+    });
+  }
+
   useEffect(() => {
     const fetchVideoDetails = async () => {
       if(video){
@@ -82,10 +106,16 @@ export default function VideoPage() {
 
   if (!video) return null;
 
+  if(video && videoDetails !== null && user){
+    updateStatus();
+  }
+
   const needsReprocessing = 
-    video.status === "failed" || 
-    (!transcript && !analysis) ||
-    (video.status === "completed" && (!transcript || !analysis));
+    user && (
+      video.status === "failed" || 
+      (!transcript && !analysis) ||
+      (video.status === "completed" && (!transcript || !analysis))
+    );
 
   // Calculate progress based on status
   const getProgressValue = () => {
@@ -102,20 +132,38 @@ export default function VideoPage() {
       {/* Left Side - Video Analysis */}
       <div className="flex-1 overflow-auto px-2">
         <div className="mb-6">
-          <h1 className="text-2xl font-bold mb-2">Analyse Video</h1>
-          <div className="flex items-center justify-between mb-2 w-auto">
-            <Progress value={getProgressValue()} className="h-2" />
-            <span className="text-sm font-medium ml-2">{getProgressValue()} / 100</span>
-          </div>
-          
-          {video.status === "processing" && (
-            <div className="bg-amber-500/10 border border-amber-500/30 rounded-lg p-4 flex items-start gap-3 mt-4">
-              <AlertCircle className="h-5 w-5 text-amber-500 mt-0.5" />
+          <h1 className="text-2xl font-bold mb-2">Video Analysis</h1>
+          {!user && isLoaded && (
+            <div className="bg-primary/10 border border-primary/30 rounded-lg p-4 flex items-start gap-3 mb-4">
+              <Lock className="h-5 w-5 text-primary mt-0.5" />
               <div>
-                <p className="font-medium text-amber-500">This is your first time analysing this video</p>
-                <p className="text-sm text-muted-foreground">(1 analysis token is being used!)</p>
+                <p className="font-medium text-primary">Sign in to access all features</p>
+                <p className="text-sm text-muted-foreground mb-2">Get access to AI analysis, title generation, and more.</p>
+                <SignInButton mode="modal">
+                  <Button variant="default" size="sm">
+                    Sign In
+                  </Button>
+                </SignInButton>
               </div>
             </div>
+          )}
+          {user && (
+            <>
+              <div className="flex items-center justify-between mb-2 w-auto">
+                <Progress value={getProgressValue()} className="h-2" />
+                <span className="text-sm font-medium ml-2">{getProgressValue()} / 100</span>
+              </div>
+              
+              {video.status === "processing" && (
+                <div className="bg-amber-500/10 border border-amber-500/30 rounded-lg p-4 flex items-start gap-3 mt-4">
+                  <AlertCircle className="h-5 w-5 text-amber-500 mt-0.5" />
+                  <div>
+                    <p className="font-medium text-amber-500">Processing your video</p>
+                    <p className="text-sm text-muted-foreground">This may take a few minutes...</p>
+                  </div>
+                </div>
+              )}
+            </>
           )}
         </div>
 
@@ -149,10 +197,56 @@ export default function VideoPage() {
           
           <div className="flex items-start gap-4">
             <div className="flex-1">
+              {/* Channel Info */}
+              {videoDetails?.channelTitle && (
+                <div className="flex items-center gap-3 mb-4">
+                  {videoDetails.channelThumbnail && (
+                    <img 
+                      src={videoDetails.channelThumbnail} 
+                      alt={videoDetails.channelTitle}
+                      className="w-10 h-10 rounded-full"
+                    />
+                  )}
+                  <div>
+                    <h3 className="font-medium">{videoDetails.channelTitle}</h3>
+                    {videoDetails.channelSubscribers && (
+                      <p className="text-sm text-muted-foreground">
+                        {formatNumber(videoDetails.channelSubscribers)} subscribers
+                      </p>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Video Stats */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                <Card className="p-3">
+                  <p className="text-sm text-muted-foreground mb-1">Views</p>
+                  <p className="text-lg font-semibold">{formatNumber(videoDetails?.views || 0)}</p>
+                </Card>
+                <Card className="p-3">
+                  <p className="text-sm text-muted-foreground mb-1">Likes</p>
+                  <p className="text-lg font-semibold">{formatNumber(videoDetails?.likes || 0)}</p>
+                </Card>
+                <Card className="p-3">
+                  <p className="text-sm text-muted-foreground mb-1">Comments</p>
+                  <p className="text-lg font-semibold">{formatNumber(videoDetails?.comments || 0)}</p>
+                </Card>
+                <Card className="p-3">
+                  <p className="text-sm text-muted-foreground mb-1">Duration</p>
+                  <p className="text-lg font-semibold">{videoDetails?.duration || '0:00'}</p>
+                </Card>
+              </div>
+
               {videoDetails?.description && (
-                <p className="text-sm text-muted-foreground mb-4 line-clamp-3">
-                  {videoDetails?.description}
-                </p>
+                <div className="mb-4">
+                  <p className="text-sm text-muted-foreground line-clamp-3">
+                    {videoDetails?.description}
+                  </p>
+                  <Button variant="link" size="sm" className="px-0 text-xs">
+                    Show more
+                  </Button>
+                </div>
               )}
               
               {/* Quick Actions */}
@@ -167,6 +261,7 @@ export default function VideoPage() {
                   variant="outline" 
                   size="sm"
                   onClick={handleGenerateTitle}
+                  disabled={!user}
                 >
                   <Type className="h-4 w-4 mr-2" />
                   Generate Title
@@ -175,6 +270,7 @@ export default function VideoPage() {
                   variant="outline" 
                   size="sm"
                   onClick={handleGenerateThumbnail}
+                  disabled={!user}
                 >
                   <Image className="h-4 w-4 mr-2" />
                   Generate Thumbnail
@@ -186,7 +282,7 @@ export default function VideoPage() {
                 >
                   <a href={video.youtubeUrl} target="_blank" rel="noopener noreferrer">
                     <Wand2 className="h-4 w-4 mr-2" />
-                    Enhance Video
+                    View on YouTube
                   </a>
                 </Button>
               </div>
@@ -299,4 +395,14 @@ export default function VideoPage() {
       </div>
     </div>
   );
+}
+
+function formatNumber(num: number): string {
+  if (num >= 1000000) {
+    return (num / 1000000).toFixed(1) + 'M';
+  }
+  if (num >= 1000) {
+    return (num / 1000).toFixed(1) + 'K';
+  }
+  return num.toString();
 } 

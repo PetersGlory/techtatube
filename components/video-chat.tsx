@@ -1,3 +1,5 @@
+/* eslint-disable jsx-a11y/alt-text */
+/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import { useState, useRef, useEffect } from "react";
@@ -5,13 +7,23 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Id } from "@/convex/_generated/dataModel";
-import { Send, User, Bot, Loader2 } from "lucide-react";
+import { Send, User, Bot, Loader2, Image, Type } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { AnimatePresence, motion } from "framer-motion";
 
 interface Message {
   role: "user" | "assistant";
   content: string;
+  imageUrl?: string;
+  sections?: {
+    title: string;
+    content: string;
+  }[];
+  metadata?: {
+    sentiment?: string;
+    rating?: string;
+    keyPoints?: string[];
+  };
 }
 
 interface VideoChatProps {
@@ -26,6 +38,7 @@ export function VideoChat({ videoId, transcript, analysis }: VideoChatProps) {
   const [isLoading, setIsLoading] = useState(false);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const [generatedImage, setGeneratedImage] = useState<string | null>(null);
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
@@ -73,7 +86,25 @@ export function VideoChat({ videoId, transcript, analysis }: VideoChatProps) {
       });
 
       const data = await response.json();
-      setMessages(prev => [...prev, { role: "assistant", content: data.response }]);
+      
+      // Handle image generation response
+      if (data.imageUrl) {
+        setGeneratedImage(data.imageUrl);
+        setMessages(prev => [...prev, { 
+          role: "assistant",
+          content: data.response,
+          imageUrl: data.imageUrl,
+          ...(data.sections && { sections: data.sections }),
+          ...(data.metadata && { metadata: data.metadata })
+        }]);
+      } else {
+        setMessages(prev => [...prev, { 
+          role: "assistant",
+          content: data.response,
+          ...(data.sections && { sections: data.sections }),
+          ...(data.metadata && { metadata: data.metadata })
+        }]);
+      }
     } catch (error) {
       console.error("Chat error:", error);
       setMessages(prev => [...prev, { 
@@ -101,8 +132,26 @@ export function VideoChat({ videoId, transcript, analysis }: VideoChatProps) {
             <Bot className="h-12 w-12 text-muted-foreground mb-4" />
             <h3 className="text-lg font-medium mb-2">How can I help you?</h3>
             <p className="text-sm text-muted-foreground max-w-md">
-              Ask me questions about the video content, request summaries, or get insights about specific parts of the video.
+              Ask me questions about the video, request title suggestions, or generate thumbnails. I&apos;m here to help!
             </p>
+            <div className="mt-4 flex flex-wrap gap-2 justify-center">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setInput("Can you generate a new thumbnail for this video?")}
+              >
+                <Image className="h-4 w-4 mr-2" />
+                Generate Thumbnail
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setInput("Can you suggest some engaging titles for this video?")}
+              >
+                <Type className="h-4 w-4 mr-2" />
+                Generate Titles
+              </Button>
+            </div>
           </div>
         ) : (
           <div className="space-y-6">
@@ -131,7 +180,51 @@ export function VideoChat({ videoId, transcript, analysis }: VideoChatProps) {
                         : "bg-muted rounded-tl-none"
                     )}
                   >
-                    <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                    {message.sections ? (
+                      <div className="space-y-4">
+                        {message.sections.map((section, idx) => (
+                          <div key={idx} className="space-y-2">
+                            <h4 className="font-semibold text-sm">{section.title}</h4>
+                            <p className="text-sm whitespace-pre-wrap">{section.content}</p>
+                          </div>
+                        ))}
+                        {message.metadata && (
+                          <div className="mt-4 pt-4 border-t border-border/50">
+                            {message.metadata.sentiment && (
+                              <p className="text-xs text-muted-foreground">
+                                <span className="font-medium">Sentiment:</span> {message.metadata.sentiment}
+                              </p>
+                            )}
+                            {message.metadata.rating && (
+                              <p className="text-xs text-muted-foreground">
+                                <span className="font-medium">Content Rating:</span> {message.metadata.rating}
+                              </p>
+                            )}
+                            {message.metadata.keyPoints && message.metadata.keyPoints.length > 0 && (
+                              <div className="mt-2">
+                                <p className="text-xs font-medium text-muted-foreground">Key Points:</p>
+                                <ul className="list-disc list-inside text-xs text-muted-foreground mt-1">
+                                  {message.metadata.keyPoints.map((point, idx) => (
+                                    <li key={idx}>{point}</li>
+                                  ))}
+                                </ul>
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                    )}
+                    {message.imageUrl && (
+                      <div className="mt-2">
+                        <img 
+                          src={message.imageUrl} 
+                          alt="Generated thumbnail"
+                          className="rounded-lg w-full max-w-md"
+                        />
+                      </div>
+                    )}
                   </div>
                   {message.role === "user" && (
                     <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary flex items-center justify-center">
